@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Homepage</title>
+</head>
+<body>
+    <h1>Welcome to the Food Business</h1>
+    
+    <h3>Place Your Order</h3>
+    <form action="{{ url_for('home') }}" method="POST">
+        <!-- Customer name input -->
+        <div>
+            <label for="customer_name">Your Name:</label>
+            <input type="text" name="customer_name" placeholder="Enter your name" required>
+        </div>
+
+        <!-- Office input -->
+        <div>
+            <label for="office">Office:</label>
+            <input type="text" name="office" placeholder="Enter your office" required>
+        </div>
+
+        <h3>Menu Items</h3>
+        {% for item in menu_items %}
+            <div>
+                <input type="checkbox" name="item" value="{{ item.Item_ID }}">
+                {{ item.Item_Name }} - ${{ item.Price }}
+                <input type="number" name="quantity" min="0" value="1">
+            </div>
+        {% endfor %}
+        
+        <h3>Special Order</h3>
+        <div>
+            <label for="special_order">Special Order Request:</label>
+            <input type="text" name="special_order" placeholder="Enter your special order (optional)">
+        </div>
+        <div>
+            <label for="delivery_date">Desired Delivery Date:</label>
+            <input type="date" name="delivery_date">
+        </div>
+
+        <button type="submit">Place Order</button>
+    </form>
+
+</body>
+</html>

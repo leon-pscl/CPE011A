@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Orders</title>
+</head>
+<body>
+    <h1>Orders List</h1>
+
+    <table border="1" cellpadding="5" cellspacing="0">
+        <tr>
+            <th>Order ID</th>
+            <th>Customer Name</th>
+            <th>Date</th>
+            <th>Time Ordered</th>
+            <th>Delivered</th>
+            <th>Action</th>
+        </tr>
+        {% for order in orders %}
+            <tr>
+                <td>{{ order.Order_ID }}</td>
+                <td>{{ order.Name }}</td>
+                <td>{{ order.Date }}</td>
+                <td>{{ order.Time_Ordered }}</td>
+                <td>{{ "Yes" if order.Delivered else "No" }}</td>
+                <td>
+                    <form action="{{ url_for('update_delivery_status', order_id=order.Order_ID) }}" method="POST">
+                        <button type="submit">
+                            {{ "Mark as Delivered" if not order.Delivered else "Mark as Not Delivered" }}
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <br><a href="{{ url_for('owner_dashboard') }}">Back to Dashboard</a>
+</body>
+</html>

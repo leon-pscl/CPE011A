@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registration Successful</title>
+</head>
+<body>
+    <h2>Registration Successful</h2>
+    <p>Your username is: <strong>{{ username }}</strong></p>
+
+    <form action="{{ url_for('login') }}">
+        <button type="submit">Proceed to Login</button>
+    </form>
+</body>
+</html>

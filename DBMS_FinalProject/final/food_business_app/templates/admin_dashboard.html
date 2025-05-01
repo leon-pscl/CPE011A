@@ -40,10 +40,34 @@
           <td data-label="Date">{{ order['Date'] }}</td>
           <td data-label="Time Ordered">{{ order['Time_Ordered'] }}</td>
           <td data-label="Delivered">{{ 'Yes' if order['Delivered'] else 'No' }}</td>
+          <td data-label="Delivered">
+            {% if not order['Delivered'] %}
+            <form action="{{ url_for('mark_delivered', order_id=order['Order_ID']) }}" method="post">
+                <button type="submit">Mark as Delivered</button>
+            </form>
+            {% else %}
+            Yes
+            {% endif %}
+        </td>
+        
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    <div class="pagination">
+      {% if current_page > 1 %}
+      <a href="{{ url_for('admin_dashboard', page=current_page - 1) }}">Previous</a>
+      {% endif %}
+    
+      {% for page_num in range(1, total_pages + 1) %}
+      <a href="{{ url_for('admin_dashboard', page=page_num) }}" {% if page_num == current_page %}class="active"{% endif %}>{{ page_num }}</a>
+      {% endfor %}
+    
+      {% if current_page < total_pages %}
+      <a href="{{ url_for('admin_dashboard', page=current_page + 1) }}">Next</a>
+      {% endif %}
+    </div>
+    
   </div>
 </body>
 

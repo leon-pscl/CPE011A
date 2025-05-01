@@ -29,13 +29,22 @@ CREATE TABLE IF NOT EXISTS Users (
 )
 ''')
 
+# ===== Categories table (new) =====
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS Categories (
+    Category_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    Category_Name TEXT UNIQUE NOT NULL
+)
+''')
+
 # ===== Menu_Items table =====
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Menu_Items (
     Item_ID INTEGER PRIMARY KEY AUTOINCREMENT,
     Item_Name TEXT NOT NULL,
-    Category TEXT CHECK(Category IN ('Coffee', 'Tea', 'Dessert')) NOT NULL,
-    Price REAL NOT NULL
+    Category TEXT NOT NULL,
+    Price REAL NOT NULL,
+    FOREIGN KEY (Category) REFERENCES Categories(Category_Name)
 )
 ''')
 
@@ -53,7 +62,7 @@ cursor.execute('''
 CREATE TABLE IF NOT EXISTS Orders (
     Order_ID INTEGER PRIMARY KEY AUTOINCREMENT,
     Customer_ID INTEGER,
-    Order_Type TEXT CHECK(Order_Type IN ('Dine-in', 'Takeout')) NOT NULL,
+    Order_Type TEXT CHECK(Order_Type IN ('Walk-in', 'Delivery')) NOT NULL,
     Date DATE NOT NULL,
     Time_Ordered TIME NOT NULL,
     Time_Delivered TIME,
@@ -87,25 +96,13 @@ CREATE TABLE IF NOT EXISTS Special_Requests (
 )
 ''')
 
-# ===== Insert sample menu items =====
-
-sample_items = [
-    ("Brewed Coffee", "Coffee", 55.00),
-    ("Cappuccino", "Coffee", 70.00),
-    ("Latte", "Coffee", 75.00),
-    ("Iced Americano", "Coffee", 65.00),
-    ("Hot Tea", "Tea", 50.00),
-    ("Milk Tea", "Tea", 60.00),
-    ("Chocolate Cake", "Dessert", 85.00),
-    ("Banana Muffin", "Dessert", 40.00)
-]
-
-for item in sample_items:
-    cursor.execute('''
-        INSERT INTO Menu_Items (Item_Name, Category, Price)
-        VALUES (?, ?, ?)
-    ''', item)
-
+# ===== Insert default categories (optional) =====
+cursor.execute('SELECT COUNT(*) FROM Categories')
+if cursor.fetchone()[0] == 0:
+    default_categories = ['Regulars', 'Specials', 'Beverages']
+    for category in default_categories:
+        cursor.execute('INSERT INTO Categories (Category_Name) VALUES (?)', (category,))
+        
 # ===== Insert one admin account (optional) =====
 cursor.execute("SELECT * FROM Users WHERE Username = 'admin'")
 if not cursor.fetchone():

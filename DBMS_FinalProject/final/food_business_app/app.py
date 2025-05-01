@@ -30,6 +30,25 @@ def generate_unique_username(first_name, last_name, cursor):
         count += 1
 
     return username
+#fetch values from CATEGORIES table
+def get_categories():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT Category_Name FROM Categories")
+    categories = cursor.fetchall()
+    conn.close()
+    return categories
+
+#add menu items
+def add_menu_item(item_name, category, price):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO Menu_Items (Item_Name, Category, Price) 
+        VALUES (?, ?, ?)
+    ''', (item_name, category, price))
+    conn.commit()
+    conn.close()
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -238,6 +257,70 @@ def order_success():
 
     conn.close()
     return render_template('order_success.html', order_items=order_items, special=special)
+
+
+@app.route('/menu-management', methods=['GET', 'POST'])
+def menu_management():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    # Handle adding a new item
+    if request.method == 'POST':
+        item_name = request.form['item_name']
+        category = request.form['category']
+        price = request.form['price']
+
+        cursor.execute("INSERT INTO Menu_Items (Item_Name, Category, Price) VALUES (?, ?, ?)",
+                       (item_name, category, price))
+        conn.commit()
+        conn.close()
+        flash('Menu item added successfully.', 'success')
+        return redirect(url_for('menu_management'))
+
+    # Check for edit request
+    edit_id = request.args.get('edit_id')
+    item_to_edit = None
+    if edit_id:
+        cursor.execute("SELECT * FROM Menu_Items WHERE Item_ID = ?", (edit_id,))
+        item_to_edit = cursor.fetchone()
+
+    # Show all menu items
+    cursor.execute("SELECT * FROM Menu_Items")
+    menu_items = cursor.fetchall()
+    conn.close()
+
+    return render_template('menu_management.html', menu_items=menu_items, item_to_edit=item_to_edit)
+
+#edit menu items
+@app.route('/menu-management/edit/<int:item_id>', methods=['POST'])
+def edit_menu_item(item_id):
+    item_name = request.form['item_name']
+    category = request.form['category']
+    price = request.form['price']
+
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Menu_Items SET Item_Name = ?, Category = ?, Price = ? WHERE Item_ID = ?",
+                   (item_name, category, price, item_id))
+    conn.commit()
+    conn.close()
+
+    flash('Menu item updated successfully.', 'success')
+    return redirect(url_for('menu_management'))
+
+# delete menu items
+@app.route('/menu-management/delete/<int:item_id>', methods=['POST'])
+def delete_menu_item(item_id):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM Menu_Items WHERE Item_ID = ?", (item_id,))
+    conn.commit()
+    conn.close()
+
+    flash('Menu item deleted successfully.', 'info')
+    return redirect(url_for('menu_management'))
+
 
 
 @app.route('/logout')

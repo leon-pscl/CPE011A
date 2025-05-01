@@ -9,7 +9,18 @@
 <body>
   <div class="container">
     <h2>Login</h2>
-
+    
+    <form action="{{ url_for('home') }}" method="get" style="margin-bottom: 1rem;">
+      <button type="submit" style="
+        background-color: #ccc;
+        color: #333;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+      ">&larr; Back to Home</button>
+    </form>
+    
     <!-- Display flash messages here -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}

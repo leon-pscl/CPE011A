@@ -1,0 +1,54 @@
+ERD
+
+Table Users {
+  User_ID int [pk, increment]
+  First_Name varchar [not null]
+  Last_Name varchar [not null]
+  Full_Name varchar [not null]
+  Username varchar [not null, unique]
+  Password varchar [not null]
+  Birthdate date [not null]
+  Address varchar [not null]
+  Contact varchar [not null]
+  Role varchar [not null, default: 'user', note: 'Values: admin, user']
+}
+
+Table Customers {
+  Customer_ID int [pk, increment]
+  User_ID int [ref: > Users.User_ID]
+  Address TEXT [not null]
+}
+
+Table Menu_Items {
+  Item_ID int [pk, increment]
+  Item_Name varchar [not null]
+  Category varchar [not null, note: 'Values: Coffee, Tea, Dessert']
+  Price float [not null]
+}
+
+Table Orders {
+  Order_ID int [pk, increment]
+  Customer_ID int [ref: > Customers.Customer_ID]
+  Order_Type varchar [not null, note: 'Values: Dine-in, Takeout']
+  Date date [not null]
+  Time_Ordered time [not null]
+  Time_Delivered time
+  Delivered boolean [not null]
+}
+
+Table Order_Items {
+  OrderItem_ID int [pk, increment]
+  Order_ID int [ref: > Orders.Order_ID]
+  Item_ID int [ref: > Menu_Items.Item_ID]
+  Quantity int [not null]
+}
+
+Table Special_Requests {
+  Request_ID int [pk, increment]
+  Customer_ID int [ref: > Customers.Customer_ID]
+  Request_Item varchar [not null]
+  Request_Date date [not null]
+  Time_Ordered datetime [not null]
+  Time_Delivered datetime
+  Approved boolean [not null]
+}

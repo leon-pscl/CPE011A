@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles_admin_dashboard.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h2>Admin Dashboard</h2>
+
+    <div class="logout">
+      <a class="logout-link" href="{{ url_for('logout') }}">Logout</a>
+    </div>
+
+    <!-- Link to Menu Management -->
+    <div class="menu-management-link">
+      <a href="{{ url_for('menu_management') }}">Manage Menu</a>
+    </div>
+
+    <h3>Order Log</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer Name</th>
+          <th>Office</th>
+          <th>Date</th>
+          <th>Time Ordered</th>
+          <th>Delivered</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
+          <td data-label="Order ID">{{ order['Order_ID'] }}</td>
+          <td data-label="Customer Name">{{ order['Customer_Name'] }}</td>
+          <td data-label="Address">{{ order['Address'] }}</td>
+          <td data-label="Date">{{ order['Date'] }}</td>
+          <td data-label="Time Ordered">{{ order['Time_Ordered'] }}</td>
+          <td data-label="Delivered">{{ 'Yes' if order['Delivered'] else 'No' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+
+</html>

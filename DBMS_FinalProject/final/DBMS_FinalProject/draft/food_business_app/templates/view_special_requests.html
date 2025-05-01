@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Special Requests</title>
+</head>
+<body>
+    <h1>Special Requests</h1>
+    <table border="1">
+        <tr>
+            <th>Request ID</th>
+            <th>Customer Name</th>
+            <th>Requested Item</th>
+            <th>Request Date</th>
+            <th>Ordered Time</th>
+            <th>Delivery Time</th>
+            <th>Approved</th>
+            <th>Actions</th>
+        </tr>
+        {% for request in requests %}
+            <tr>
+                <td>{{ request.Request_ID }}</td>
+                <td>{{ request.Name }}</td>
+                <td>{{ request.Request_Item }}</td>
+                <td>{{ request.Request_Date }}</td>
+                <td>{{ request.Time_Ordered }}</td>
+                <td>{{ request.Time_Delivered }}</td>
+                <td>{{ "Yes" if request.Approved else "No" }}</td>
+                <td>
+                    {% if not request.Approved %}
+                        <a href="{{ url_for('approve_special_request', request_id=request.Request_ID) }}">Approve</a>
+                    {% else %}
+                        <a href="{{ url_for('disapprove_special_request', request_id=request.Request_ID) }}">Disapprove</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

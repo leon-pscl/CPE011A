@@ -14,7 +14,7 @@ conn = sqlite3.connect(DB_PATH)
 conn.execute('PRAGMA foreign_keys = ON')
 cursor = conn.cursor()
 
-# Create tables
+# ===== Users table with role support =====
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Users (
     User_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,33 +25,36 @@ CREATE TABLE IF NOT EXISTS Users (
     Password TEXT NOT NULL,
     Birthdate TEXT NOT NULL,
     Address TEXT NOT NULL,
-    Contact TEXT NOT NULL
+    Contact TEXT NOT NULL,
+    Role TEXT CHECK(Role IN ('admin', 'user')) NOT NULL DEFAULT 'user'
 )
 ''')
 
+# ===== Menu_Items table =====
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Menu_Items (
     Item_ID INTEGER PRIMARY KEY AUTOINCREMENT,
     Item_Name TEXT NOT NULL,
-    Item_Type TEXT CHECK(Item_Type IN ('Mainstay', 'Special')) NOT NULL,
-    Price REAL NOT NULL,
-    Available_For TEXT CHECK(Available_For IN ('1A', '2A', 'both')) NOT NULL
+    Category TEXT CHECK(Category IN ('Coffee', 'Tea', 'Dessert')) NOT NULL,
+    Price REAL NOT NULL
 )
 ''')
 
+# ===== Customers table =====
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Customers (
     Customer_ID INTEGER PRIMARY KEY AUTOINCREMENT,
     Name TEXT NOT NULL,
-    Office TEXT NOT NULL
+    Address TEXT NOT NULL
 )
 ''')
 
+# ===== Orders and Order_Items tables =====
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Orders (
     Order_ID INTEGER PRIMARY KEY AUTOINCREMENT,
     Customer_ID INTEGER,
-    Order_Type TEXT CHECK(Order_Type IN ('Walk-in', 'Office')) NOT NULL,
+    Order_Type TEXT CHECK(Order_Type IN ('Dine-in', 'Takeout')) NOT NULL,
     Date DATE NOT NULL,
     Time_Ordered TIME NOT NULL,
     Time_Delivered TIME,
@@ -71,6 +74,7 @@ CREATE TABLE IF NOT EXISTS Order_Items (
 )
 ''')
 
+# ===== Special_Requests table =====
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Special_Requests (
     Request_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,16 +88,31 @@ CREATE TABLE IF NOT EXISTS Special_Requests (
 )
 ''')
 
-# Insert sample items
+# ===== Insert sample menu items =====
 sample_items = [
-    ("Coke", "Special", 1.50, "2A"),
-    ("Pepsi", "Special", 1.50, "2A"),
-    ("Lemonade", "Special", 1.80, "2A"),
-    ("Iced Tea", "Special", 1.70, "2A")
+    ("Brewed Coffee", "Coffee", 55.00),
+    ("Cappuccino", "Coffee", 70.00),
+    ("Latte", "Coffee", 75.00),
+    ("Iced Americano", "Coffee", 65.00),
+    ("Hot Tea", "Tea", 50.00),
+    ("Milk Tea", "Tea", 60.00),
+    ("Chocolate Cake", "Dessert", 85.00),
+    ("Banana Muffin", "Dessert", 40.00)
 ]
 
 for item in sample_items:
-    cursor.execute("INSERT INTO Menu_Items (Item_Name, Item_Type, Price, Available_For) VALUES (?, ?, ?, ?)", item)
+    cursor.execute('''
+        INSERT INTO Menu_Items (Item_Name, Category, Price)
+        VALUES (?, ?, ?)
+    ''', item)
+
+# ===== Insert one admin account (optional) =====
+cursor.execute("SELECT * FROM Users WHERE Username = 'admin'")
+if not cursor.fetchone():
+    cursor.execute('''
+        INSERT INTO Users (First_Name, Last_Name, Full_Name, Username, Password, Birthdate, Address, Contact, Role)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', ("Admin", "User", "Admin User", "admin", "admin123", "1990-01-01", "HQ", "09123456789", "admin"))
 
 conn.commit()
 conn.close()

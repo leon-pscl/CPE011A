@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% if user_logged_in %}Welcome {{ full_name }}{% else %}Welcome to Foodie{% endif %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles_home.css') }}">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div>
+      <a href="/" class="logo">Foodie</a>
+    </div>
+    <div class="auth-buttons">
+      {% if not user_logged_in %}
+        <a href="{{ url_for('login') }}" class="btn-login">Login</a>
+        <a href="{{ url_for('register') }}" class="btn-signup">Sign Up</a>
+      {% else %}
+        <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+      {% endif %}
+    </div>
+  </header>
+
+  {% if user_logged_in %}
+  <div class="container">
+    <h1>Welcome, {{ full_name }}</h1>
+
+    <button class="back-button_ani" onclick="history.back()">
+      <span>Back</span>
+    </button>
+
+    <div class="section">
+      <p><strong>Name:</strong> {{ full_name }}</p>
+      <p><strong>Address:</strong> {{ address }}</p>
+    </div>
+
+    <form method="POST">
+      <!-- Order Type -->
+      <div class="section">
+        <h3>Order Type</h3>
+        <select name="order_type" required>
+          <option value="">Select order type</option>
+          <option value="Dine-in">Dine-in</option>
+          <option value="Takeout">Takeout</option>
+        </select>
+      </div>
+
+      <!-- Menu Items -->
+      <div class="section">
+        <h2>Menu Items</h2>
+        <div class="menu-columns">
+          {% for category in ['Tea', 'Coffee', 'Dessert'] %}
+            <div>
+              <h3>{{ category }}</h3>
+              {% for item in menu_items if item['Category'] == category %}
+                <div class="menu-item">
+                  <label>
+                    <input type="checkbox" name="item" value="{{ item['Item_ID'] }}">
+                    {{ item['Item_Name'] }} (₱{{ '%.2f'|format(item['Price']) }})
+                  </label>
+                  Quantity:
+                  <input type="number" name="quantity_{{ item['Item_ID'] }}" value="0" min="0">
+                </div>
+              {% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Special Order -->
+      <div class="section">
+        <h3>Special Order</h3>
+        <input type="text" name="special_order" placeholder="Enter item not on menu" style="width: 100%;">
+      </div>
+
+      <!-- Delivery Date -->
+      <div class="section">
+        <h3>Delivery Date</h3>
+        <input type="date" name="delivery_date" required>
+      </div>
+
+      <button type="submit" class="button_ani">
+        <span>Place Order</span>
+      </button>
+    </form>
+  </div>
+  {% else %}
+    <div class="container">
+      <h1>Welcome to Foodie!</h1>
+      <p>Please <a href="{{ url_for('login') }}">log in</a> or <a href="{{ url_for('register') }}">sign up</a> to place an order.</p>
+    </div>
+  {% endif %}
+</body>
+</html>

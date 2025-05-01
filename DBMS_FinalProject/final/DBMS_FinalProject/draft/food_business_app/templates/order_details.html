@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Details</title>
+</head>
+<body>
+    <h1>Order Details</h1>
+    <table border="1">
+        <tr>
+            <th>Item Name</th>
+            <th>Quantity</th>
+        </tr>
+        {% for item in items %}
+            <tr>
+                <td>{{ item.Item_Name }}</td>
+                <td>{{ item.Quantity }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <br><a href="{{ url_for('view_orders') }}">Back to Orders</a>
+</body>
+</html>

@@ -4,57 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .container {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 400px;
-    }
-    h2 {
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-    label {
-      display: block;
-      margin-top: 1rem;
-    }
-    input {
-      width: 100%;
-      padding: 0.5rem;
-      margin-top: 0.25rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    input[type="submit"] {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      margin-top: 1.5rem;
-      cursor: pointer;
-    }
-    input[type="submit"]:hover {
-      background-color: #45a049;
-    }
-    .register-link {
-      margin-top: 1rem;
-      text-align: center;
-    }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles_login.css') }}">
 </head>
 <body>
   <div class="container">
     <h2>Login</h2>
+
+    <!-- Display flash messages here -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul>
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
     <form method="post">
       <label for="username">Username</label>
       <input name="username" id="username" required>

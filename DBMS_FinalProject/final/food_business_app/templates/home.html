@@ -21,24 +21,23 @@
     </div>
   </header>
 
-  {% if user_logged_in %}
   <div class="container">
-    <h1>Welcome, {{ full_name }}</h1>
+    {% if user_logged_in %}
+      <h1>Welcome, {{ full_name }}</h1>
+      <div class="section">
+        <p><strong>Name:</strong> {{ full_name }}</p>
+        <p><strong>Address:</strong> {{ address }}</p>
+      </div>
+    {% else %}
+      <h1>Welcome to Foodie!</h1>
+      <p>Please <a href="{{ url_for('login') }}">log in</a> or <a href="{{ url_for('register') }}">sign up</a> to place an order.</p>
+    {% endif %}
 
-    <button class="back-button_ani" onclick="history.back()">
-      <span>Back</span>
-    </button>
-
-    <div class="section">
-      <p><strong>Name:</strong> {{ full_name }}</p>
-      <p><strong>Address:</strong> {{ address }}</p>
-    </div>
-
-    <form method="POST">
+    <form method="POST" {% if not user_logged_in %} onsubmit="event.preventDefault(); window.location.href='{{ url_for('login') }}';" {% endif %}>
       <!-- Order Type -->
       <div class="section">
         <h3>Order Type</h3>
-        <select name="order_type" required>
+        <select name="order_type" {% if not user_logged_in %}disabled{% endif %} required>
           <option value="">Select order type</option>
           <option value="Dine-in">Dine-in</option>
           <option value="Takeout">Takeout</option>
@@ -55,11 +54,11 @@
               {% for item in menu_items if item['Category'] == category %}
                 <div class="menu-item">
                   <label>
-                    <input type="checkbox" name="item" value="{{ item['Item_ID'] }}">
+                    <input type="checkbox" name="item" value="{{ item['Item_ID'] }}" {% if not user_logged_in %}disabled{% endif %}>
                     {{ item['Item_Name'] }} (₱{{ '%.2f'|format(item['Price']) }})
                   </label>
                   Quantity:
-                  <input type="number" name="quantity_{{ item['Item_ID'] }}" value="0" min="0">
+                  <input type="number" name="quantity_{{ item['Item_ID'] }}" value="0" min="0" {% if not user_logged_in %}disabled{% endif %}>
                 </div>
               {% endfor %}
             </div>
@@ -70,25 +69,19 @@
       <!-- Special Order -->
       <div class="section">
         <h3>Special Order</h3>
-        <input type="text" name="special_order" placeholder="Enter item not on menu" style="width: 100%;">
+        <input type="text" name="special_order" placeholder="Enter item not on menu" style="width: 100%;" {% if not user_logged_in %}disabled{% endif %}>
       </div>
 
       <!-- Delivery Date -->
       <div class="section">
         <h3>Delivery Date</h3>
-        <input type="date" name="delivery_date" required>
+        <input type="date" name="delivery_date" {% if not user_logged_in %}disabled{% endif %} required>
       </div>
 
       <button type="submit" class="button_ani">
-        <span>Place Order</span>
+        <span>{% if user_logged_in %}Place Order{% else %}Login to Order{% endif %}</span>
       </button>
     </form>
   </div>
-  {% else %}
-    <div class="container">
-      <h1>Welcome to Foodie!</h1>
-      <p>Please <a href="{{ url_for('login') }}">log in</a> or <a href="{{ url_for('register') }}">sign up</a> to place an order.</p>
-    </div>
-  {% endif %}
 </body>
 </html>

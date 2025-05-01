@@ -23,7 +23,6 @@ CREATE TABLE IF NOT EXISTS Users (
     Full_Name TEXT NOT NULL,
     Username TEXT UNIQUE NOT NULL,
     Password TEXT NOT NULL,
-    Birthdate TEXT NOT NULL,
     Address TEXT NOT NULL,
     Contact TEXT NOT NULL,
     Role TEXT CHECK(Role IN ('admin', 'user')) NOT NULL DEFAULT 'user'
@@ -89,6 +88,7 @@ CREATE TABLE IF NOT EXISTS Special_Requests (
 ''')
 
 # ===== Insert sample menu items =====
+
 sample_items = [
     ("Brewed Coffee", "Coffee", 55.00),
     ("Cappuccino", "Coffee", 70.00),
@@ -110,9 +110,10 @@ for item in sample_items:
 cursor.execute("SELECT * FROM Users WHERE Username = 'admin'")
 if not cursor.fetchone():
     cursor.execute('''
-        INSERT INTO Users (First_Name, Last_Name, Full_Name, Username, Password, Birthdate, Address, Contact, Role)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', ("Admin", "User", "Admin User", "admin", "admin123", "1990-01-01", "HQ", "09123456789", "admin"))
+        INSERT INTO Users (First_Name, Last_Name, Full_Name, Username, Password, Address, Contact, Role)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', ("Admin", "User", "Admin User", "admin", "admin098", "HQ", "09123456789", "admin"))
+
 
 conn.commit()
 conn.close()

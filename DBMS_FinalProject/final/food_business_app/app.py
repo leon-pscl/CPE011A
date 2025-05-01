@@ -192,17 +192,80 @@ def admin_dashboard():
 
     conn = get_db_connection()
     cursor = conn.cursor()
+    
+     # Pagination parameters
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    offset = (page - 1) * per_page
+    
     cursor.execute("""
         SELECT o.Order_ID, c.Name AS Customer_Name, c.Address, o.Date, o.Time_Ordered, o.Delivered
         FROM Orders o
         JOIN Customers c ON o.Customer_ID = c.Customer_ID
         ORDER BY o.Date DESC, o.Time_Ordered DESC
     """)
+    
+    # Fetch orders with pagination
+    cursor.execute("""
+        SELECT o.Order_ID, c.Name AS Customer_Name, c.Address, o.Date, o.Time_Ordered, o.Delivered
+        FROM Orders o
+        JOIN Customers c ON o.Customer_ID = c.Customer_ID
+        ORDER BY o.Date DESC, o.Time_Ordered DESC
+        LIMIT ? OFFSET ?
+    """, (per_page, offset))
+    orders = cursor.fetchall()
+
+    # Count total orders for pagination links
+    cursor.execute("SELECT COUNT(*) FROM Orders")
+    total_orders = cursor.fetchone()[0]
+    total_pages = (total_orders // per_page) + (1 if total_orders % per_page else 0)
+    
     orders = cursor.fetchall()
     conn.close()
 
-    return render_template('admin_dashboard.html', orders=orders)
+    return render_template('admin_dashboard.html', orders=orders, total_pages=total_pages, current_page=page)
+#change if order has been delivered
+@app.route('/mark_delivered/<int:order_id>', methods=['POST'])
+def mark_delivered(order_id):
+    if session.get('role') != 'admin':
+        return redirect(url_for('home'))
 
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Orders SET Delivered = 1 WHERE Order_ID = ?", (order_id,))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/order_details/<int:order_id>')
+def order_details(order_id):
+    if session.get('role') != 'admin':
+        return redirect(url_for('home'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Fetch order details
+    cursor.execute("""
+        SELECT oi.Item_ID, mi.Item_Name, oi.Quantity, mi.Price
+        FROM Order_Items oi
+        JOIN Menu_Items mi ON oi.Item_ID = mi.Item_ID
+        WHERE oi.Order_ID = ?
+    """, (order_id,))
+    order_items = cursor.fetchall()
+
+    # Fetch any special requests for this order
+    cursor.execute("""
+        SELECT Special_Request
+        FROM Special_Requests
+        WHERE Order_ID = ?
+    """, (order_id,))
+    special_requests = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('order_details.html', order_id=order_id, order_items=order_items, special_requests=special_requests)
 
 @app.route('/order_success')
 def order_success():
@@ -257,6 +320,8 @@ def order_success():
 
     conn.close()
     return render_template('order_success.html', order_items=order_items, special=special)
+
+
 
 
 @app.route('/menu-management', methods=['GET', 'POST'])

@@ -133,7 +133,17 @@
 <body>
 
   <h1>Manage Menu Items</h1>
-  <a href="{{ url_for('admin_dashboard') }}" class="cancel-link" style="display:inline-block; margin-bottom:1rem;">&larr; Back to Dashboard</a>
+  <form action="{{ url_for('admin_dashboard') }}" method="get" style="margin: 0; padding: 0; display: inline;">
+    <button type="submit" style="
+      background-color: #ccc;
+      color: #333;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+    ">&larr; Back to Dashboard</button>
+  </form>  
 
   <!-- Flash messages -->
   {% with messages = get_flashed_messages(with_categories=true) %}

@@ -150,10 +150,15 @@ def home():
             customer_id = cursor.lastrowid
 
         now = datetime.now()
+        date_str = now.strftime('%Y-%m-%d')
+        time_str = now.strftime('%H:%M:%S')
+
         cursor.execute(
             "INSERT INTO Orders (Customer_ID, Order_Type, Date, Time_Ordered, Delivered) VALUES (?, ?, ?, ?, ?)",
             (customer_id, order_type, now.date(), now.time().isoformat(), False)
         )
+
+        
         conn.commit()
         order_id = cursor.lastrowid
 
@@ -197,13 +202,6 @@ def admin_dashboard():
     page = request.args.get('page', 1, type=int)
     per_page = 10
     offset = (page - 1) * per_page
-    
-    cursor.execute("""
-        SELECT o.Order_ID, c.Name AS Customer_Name, c.Address, o.Date, o.Time_Ordered, o.Delivered
-        FROM Orders o
-        JOIN Customers c ON o.Customer_ID = c.Customer_ID
-        ORDER BY o.Date DESC, o.Time_Ordered DESC
-    """)
     
     # Fetch orders with pagination
     cursor.execute("""

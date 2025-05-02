@@ -59,7 +59,7 @@ def register():
         address = request.form["address"]
         contact = request.form["contact"]
         password = request.form["password"]
-        role = request.form["role"]
+        role = "user"
 
         names = full_name.split()
         if len(names) < 2:
@@ -222,7 +222,6 @@ def special_requests():
 
     return render_template('special_requests.html', user_logged_in=user_logged_in, full_name=full_name, address=address)
 
-
 @app.route('/admin_dashboard')
 def admin_dashboard():
     if session.get('role') != 'admin':
@@ -267,6 +266,30 @@ def admin_dashboard():
         pending_requests=pending_requests  # Passing the number of pending special requests
     )
 
+@app.route('/mark_delivered/<int:order_id>', methods=['POST'])
+def mark_delivered(order_id):
+    if session.get('role') != 'admin':
+        return redirect(url_for('home'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Get the current time for the delivery timestamp
+    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    # Update the order status to delivered and set the time delivered
+    cursor.execute('''
+        UPDATE Orders 
+        SET Delivered = 1, Time_Delivered = ? 
+        WHERE Order_ID = ?
+    ''', (current_time, order_id))
+
+    conn.commit()
+    conn.close()
+
+    # After updating, redirect to the admin dashboard
+    return redirect(url_for('admin_dashboard'))
+
 
 @app.route('/order_details/<int:order_id>')
 def order_details(order_id):
@@ -276,23 +299,29 @@ def order_details(order_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Fetch order details
-    cursor.execute("""
-        SELECT oi.Item_ID, mi.Item_Name, oi.Quantity, mi.Price
+    # Fetch order items for the given order ID
+    cursor.execute('''
+        SELECT oi.Quantity, mi.Item_Name, mi.Price
         FROM Order_Items oi
         JOIN Menu_Items mi ON oi.Item_ID = mi.Item_ID
         WHERE oi.Order_ID = ?
-    """, (order_id,))
+    ''', (order_id,))
     order_items = cursor.fetchall()
 
-    cursor.execute("""
-        SELECT Requested_Delivery_Time FROM Orders WHERE Order_ID = ?
-    """, (order_id,))
+    # Fetch the requested delivery time for the given order ID
+    cursor.execute('''
+        SELECT Requested_Delivery_Time
+        FROM Orders
+        WHERE Order_ID = ?
+    ''', (order_id,))
     requested_delivery_time = cursor.fetchone()
 
     conn.close()
 
-    return render_template('order_details.html', order_id=order_id, order_items=order_items, requested_delivery_time=requested_delivery_time['Requested_Delivery_Time'])
+    return render_template('order_details.html', 
+                           order_id=order_id, 
+                           order_items=order_items, 
+                           requested_delivery_time=requested_delivery_time['Requested_Delivery_Time'] if requested_delivery_time else None)
 
 
 @app.route('/order_success')
@@ -346,7 +375,7 @@ def order_success():
     # Format the requested delivery time if available
     requested_delivery_time = latest_order['Requested_Delivery_Time']
     if requested_delivery_time:
-        requested_delivery_time = datetime.strptime(requested_delivery_time, '%H:%M:%S').strftime('%I:%M %p')
+        requested_delivery_time = datetime.strptime(requested_delivery_time, '%H:%M').strftime('%I:%M %p')
 
     conn.close()
 
@@ -355,21 +384,60 @@ def order_success():
 import sqlite3
 import os
 
-# Define the database path
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, 'database', 'food_business.db')
+@app.route('/menu_management', methods=['GET', 'POST'])
+def menu_management():
+    if session.get('role') != 'admin':
+        return redirect(url_for('home'))
 
-# Create the database directory if it doesn't exist
-if not os.path.exists(os.path.dirname(DB_PATH)):
-    os.makedirs(os.path.dirname(DB_PATH))
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-# Create a connection to the database
-conn = sqlite3.connect(DB_PATH)
-conn.execute('PRAGMA foreign_keys = ON')
-cursor = conn.cursor()
+    if request.method == 'POST':
+        if 'delete_item_id' in request.form:
+            # Deleting a menu item
+            item_id = request.form.get('delete_item_id')
+            cursor.execute('DELETE FROM Menu_Items WHERE Item_ID = ?', (item_id,))
+            conn.commit()
+            flash('Menu item deleted successfully!')
+        else:
+            # Adding or Editing a menu item
+            item_id = request.form.get('item_id')
+            item_name = request.form.get('item_name')
+            category = request.form.get('category')
+            price = request.form.get('price')
 
-conn.commit()
-conn.close()
+            if item_id:
+                # Editing
+                cursor.execute("""
+                    UPDATE Menu_Items
+                    SET Item_Name = ?, Category = ?, Price = ?
+                    WHERE Item_ID = ?
+                """, (item_name, category, price, item_id))
+                flash('Menu item updated successfully!')
+            else:
+                # Adding
+                cursor.execute("""
+                    INSERT INTO Menu_Items (Item_Name, Category, Price)
+                    VALUES (?, ?, ?)
+                """, (item_name, category, price))
+                flash('Menu item added successfully!')
+
+            conn.commit()
+
+    # Fetch menu items
+    cursor.execute("SELECT Item_ID, Item_Name, Category, Price FROM Menu_Items")
+    menu_items = cursor.fetchall()
+
+    # Handle Edit Form
+    item_to_edit = None
+    if request.args.get('edit_id'):
+        cursor.execute('SELECT * FROM Menu_Items WHERE Item_ID = ?', (request.args.get('edit_id'),))
+        item_to_edit = cursor.fetchone()
+
+    conn.close()
+
+    return render_template('menu_management.html', menu_items=menu_items, item_to_edit=item_to_edit)
+
 
 @app.route('/logout')
 def logout():

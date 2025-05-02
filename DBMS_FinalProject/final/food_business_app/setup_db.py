@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS Orders (
     Order_Type TEXT CHECK(Order_Type IN ('Walk-in', 'Delivery')) NOT NULL,
     Date DATE NOT NULL,
     Time_Ordered TIME NOT NULL,
+    Requested_Delivery_Time TIME,
     Time_Delivered TIME,
     Delivered BOOLEAN NOT NULL,
     FOREIGN KEY (Customer_ID) REFERENCES Customers(Customer_ID)
@@ -114,4 +115,6 @@ if not cursor.fetchone():
 
 conn.commit()
 conn.close()
+
+
 print(f"Database and tables created at {DB_PATH}")

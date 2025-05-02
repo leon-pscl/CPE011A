@@ -1,4 +1,4 @@
-/* CSS styling for home.html */
+/* CSS for home.html */
 
 /* for the whole page */
 a {
@@ -17,7 +17,7 @@ body {
   background: #fffaf0;
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
 h1, h2, h3 {
@@ -52,6 +52,7 @@ label {
 
 input[type="number"] {
   width: 60px;
+  margin-left: 10px;
 }
 
 input, select {
@@ -83,50 +84,50 @@ input, select {
 
 /* styling for Place Order button */
 .button_ani {
-    font-weight: 750; /* Font weight (likely should be 900 for bold) */
-    font-size: 18px;
-    text-align: center;
-    display: inline-block;
-    border-radius: 5px;
-    background-color: #c19a6b; /* Light blue background */
-    border: none;
-    color: #202020; /* Dark gray color */
-    padding: 15px;
-    transition: all 0.5s; /* Smooth transition for all properties */
-    cursor: pointer;
-    justify-content: center;
-    place-items: left;
-  }
-  
-  .button_ani span {
-    cursor: pointer;
-    display: inline-block;
-    position: relative;
-    transition: 0.5s;
-  }
-  
-  .button_ani:hover {
-    background-color:  #fffaf0; /* Light gray background on hover */
-    color: #202020; /* Dark gray text */
-  }
-  
-  .button_ani span:after {
-    content: '\00bb'; /* Right-pointing arrow (» symbol) */
-    position: absolute;
-    opacity: 0; /* Initially invisible */
-    top: 0;
-    right: -20px; /* Position the arrow off-screen to the right */
-    transition: 0.5s;
-  }
-  
-  .button_ani:hover span {
-    padding-right: 40px; /* Add space to the right for the arrow to appear */
-  }
-  
-  .button_ani:hover span:after {
-    opacity: 1; /* Make the arrow visible */
-    right: 0; /* Move the arrow to the edge of the span */
-  }
+  font-weight: 750; /* Font weight (likely should be 900 for bold) */
+  font-size: 18px;
+  text-align: center;
+  display: inline-block;
+  border-radius: 5px;
+  background-color: #c19a6b; /* Light blue background */
+  border: none;
+  color: #202020; /* Dark gray color */
+  padding: 15px;
+  transition: all 0.5s; /* Smooth transition for all properties */
+  cursor: pointer;
+  justify-content: center;
+  place-items: left;
+}
+
+.button_ani span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.button_ani:hover {
+  background-color:  #fffaf0; /* Light gray background on hover */
+  color: #202020; /* Dark gray text */
+}
+
+.button_ani span:after {
+  content: '\00bb'; /* Right-pointing arrow (» symbol) */
+  position: absolute;
+  opacity: 0; /* Initially invisible */
+  top: 0;
+  right: -20px; /* Position the arrow off-screen to the right */
+  transition: 0.5s;
+}
+
+.button_ani:hover span {
+  padding-right: 40px; /* Add space to the right for the arrow to appear */
+}
+
+.button_ani:hover span:after {
+  opacity: 1; /* Make the arrow visible */
+  right: 0; /* Move the arrow to the edge of the span */
+}
 
 /* Style for the header to display logo and buttons in a row */
 header {
@@ -165,7 +166,6 @@ header {
 .btn-login:hover {
   background-color: #fffaf0;
   color: #d70f64;
-
 }
 
 /* Sign-up button style */
@@ -184,4 +184,9 @@ header {
 .btn-signup:hover {
   background-color: #fffaf0;
   color: #1e7e34;
+}
+
+/* Hide quantity input by default */
+.menu-item .quantity-wrapper {
+  display: none;
 }

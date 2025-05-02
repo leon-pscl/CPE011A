@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Special Requests</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles_special_requests.css') }}">
+</head>
+<body>
+    <header>
+        <a href="/" class="logo">Foodie</a>
+        <div class="auth-buttons">
+            {% if user_logged_in %}
+                <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn-login">Login</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="container">
+        {% if user_logged_in %}
+            <h1>Manage Special Requests</h1>
+            <form method="POST">
+                <div class="section">
+                    <label for="special_request">Special Request:</label>
+                    <textarea id="special_request" name="special_request" required></textarea>
+                </div>
+                <button type="submit" class="button_ani">Submit Request</button>
+            </form>
+        {% else %}
+            <h1>Please log in to manage your special requests.</h1>
+        {% endif %}
+    </div>
+</body>
+</html>

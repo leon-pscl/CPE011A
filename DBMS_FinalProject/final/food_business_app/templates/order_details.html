@@ -10,6 +10,7 @@
   <div class="container">
     <h1>Order Details for Order ID: {{ order_id }}</h1>
 
+    <!-- Order Items Section -->
     <div class="order-items">
       <h3>Order Items</h3>
       <table class="order-table">
@@ -34,6 +35,15 @@
       </table>
     </div>
 
+    <!-- Requested Delivery Time Section -->
+    {% if requested_delivery_time %}
+      <div class="delivery-time">
+        <h3>Requested Delivery Time</h3>
+        <p>{{ requested_delivery_time }}</p>
+      </div>
+    {% endif %}
+
+    <!-- Back Button -->
     <div class="back-button">
       <a href="{{ url_for('admin_dashboard') }}" class="btn-back">Back to Dashboard</a>
     </div>

@@ -30,6 +30,7 @@ def generate_unique_username(first_name, last_name, cursor):
         count += 1
 
     return username
+
 #fetch values from CATEGORIES table
 def get_categories():
     conn = sqlite3.connect(DB_PATH)
@@ -43,7 +44,7 @@ def get_categories():
 def add_menu_item(item_name, category, price):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute('''
+    cursor.execute(''' 
         INSERT INTO Menu_Items (Item_Name, Category, Price) 
         VALUES (?, ?, ?)
     ''', (item_name, category, price))
@@ -129,15 +130,9 @@ def home():
             return redirect(url_for('login'))
 
         customer_name = full_name
-        selected_items = request.form.getlist('item')
-        special_order = request.form['special_order']
-        delivery_date = request.form['delivery_date']
+        selected_items = request.form.getlist('item_ids[]')
+        requested_delivery_time = request.form['requested_delivery_time']
         order_type = request.form['order_type']
-
-        if not selected_items and not special_order:
-            conn.close()
-            flash("No items or special request submitted.")
-            return redirect(url_for('home'))
 
         cursor.execute("SELECT Customer_ID FROM Customers WHERE Name = ? AND Address = ?", (customer_name, address))
         customer = cursor.fetchone()
@@ -154,11 +149,10 @@ def home():
         time_str = now.strftime('%H:%M:%S')
 
         cursor.execute(
-            "INSERT INTO Orders (Customer_ID, Order_Type, Date, Time_Ordered, Delivered) VALUES (?, ?, ?, ?, ?)",
-            (customer_id, order_type, now.date(), now.time().isoformat(), False)
+            "INSERT INTO Orders (Customer_ID, Order_Type, Date, Time_Ordered, Delivered, Requested_Delivery_Time) VALUES (?, ?, ?, ?, ?, ?)",
+            (customer_id, order_type, now.date(), now.time().isoformat(), False, requested_delivery_time)
         )
 
-        
         conn.commit()
         order_id = cursor.lastrowid
 
@@ -169,12 +163,6 @@ def home():
                     "INSERT INTO Order_Items (Order_ID, Item_ID, Quantity) VALUES (?, ?, ?)",
                     (order_id, item_id, quantity)
                 )
-
-        if special_order:
-            cursor.execute(
-                "INSERT INTO Special_Requests (Customer_ID, Request_Item, Request_Date, Time_Ordered, Approved) VALUES (?, ?, ?, ?, ?)",
-                (customer_id, special_order, delivery_date, now.isoformat(), False)
-            )
 
         conn.commit()
         conn.close()
@@ -189,6 +177,51 @@ def home():
         user_logged_in=user_logged_in
     )
 
+@app.route('/special_requests', methods=['GET', 'POST'])
+def special_requests():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+
+    user_logged_in = 'user' in session
+    full_name = session.get('full_name')
+    address = session.get('address')
+
+    if request.method == 'POST':
+        request_item = request.form['special_request']
+        if len(request_item) > 0:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+
+            cursor.execute('''
+                SELECT Customer_ID FROM Customers WHERE Name = ? AND Address = ?
+            ''', (full_name, address))
+            customer = cursor.fetchone()
+
+            if customer:
+                customer_id = customer['Customer_ID']
+            else:
+                cursor.execute('''
+                    INSERT INTO Customers (Name, Address) VALUES (?, ?)
+                ''', (full_name, address))
+                conn.commit()
+                customer_id = cursor.lastrowid
+
+            cursor.execute('''
+                INSERT INTO Special_Requests (Customer_ID, Request_Item, Request_Date, Time_Ordered, Approved)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (customer_id, request_item, datetime.now().date(), datetime.now(), False))
+            
+            conn.commit()
+            conn.close()
+
+            flash("Special request added successfully.", "success")
+            return redirect(url_for('home'))
+        else:
+            flash("Please enter a special request.", "error")
+            return redirect(url_for('special_requests'))
+
+    return render_template('special_requests.html', user_logged_in=user_logged_in, full_name=full_name, address=address)
+
 
 @app.route('/admin_dashboard')
 def admin_dashboard():
@@ -198,7 +231,7 @@ def admin_dashboard():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Pagination
+    # Pagination for orders
     page = int(request.args.get('page', 1))
     per_page = 10
     offset = (page - 1) * per_page
@@ -208,41 +241,32 @@ def admin_dashboard():
     total_orders = cursor.fetchone()[0]
     total_pages = (total_orders + per_page - 1) // per_page
 
-   
     # Fetch orders with customer name and address from Customers table
-    cursor.execute("""
-        SELECT o.Order_ID, o.Date, o.Time_Ordered, o.Delivered,
-            c.Name AS Customer_Name, c.Address
+    cursor.execute(""" 
+        SELECT o.Order_ID, o.Date, o.Time_Ordered, o.Delivered, o.Time_Delivered, 
+        c.Name AS Customer_Name, c.Address
         FROM Orders o
         LEFT JOIN Customers c ON o.Customer_ID = c.Customer_ID
         ORDER BY o.Date DESC, o.Time_Ordered DESC
         LIMIT ? OFFSET ?
     """, (per_page, offset))
 
-
     orders = cursor.fetchall()
+
+    # Count pending special requests (requests that have not been approved)
+    cursor.execute("SELECT COUNT(*) FROM Special_Requests WHERE Approved = 0")
+    pending_requests = cursor.fetchone()[0]
+
     conn.close()
 
     return render_template(
         'admin_dashboard.html',
         orders=orders,
         current_page=page,
-        total_pages=total_pages
+        total_pages=total_pages,
+        pending_requests=pending_requests  # Passing the number of pending special requests
     )
 
-#change if order has been delivered
-@app.route('/mark_delivered/<int:order_id>', methods=['POST'])
-def mark_delivered(order_id):
-    if session.get('role') != 'admin':
-        return redirect(url_for('home'))
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("UPDATE Orders SET Delivered = 1 WHERE Order_ID = ?", (order_id,))
-    conn.commit()
-    conn.close()
-
-    return redirect(url_for('admin_dashboard'))
 
 @app.route('/order_details/<int:order_id>')
 def order_details(order_id):
@@ -261,9 +285,14 @@ def order_details(order_id):
     """, (order_id,))
     order_items = cursor.fetchall()
 
+    cursor.execute("""
+        SELECT Requested_Delivery_Time FROM Orders WHERE Order_ID = ?
+    """, (order_id,))
+    requested_delivery_time = cursor.fetchone()
+
     conn.close()
 
-    return render_template('order_details.html', order_id=order_id, order_items=order_items)
+    return render_template('order_details.html', order_id=order_id, order_items=order_items, requested_delivery_time=requested_delivery_time['Requested_Delivery_Time'])
 
 
 @app.route('/order_success')
@@ -277,18 +306,20 @@ def order_success():
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    # Get the customer ID
     cursor.execute("""
         SELECT Customer_ID FROM Customers
         WHERE Name = ? AND Address = ?
     """, (full_name, address))
-
     customer = cursor.fetchone()
+
     if not customer:
         conn.close()
-        return render_template('order_success.html', order_items=[], special=None)
+        return render_template('order_success.html', order_items=[], requested_delivery_time=None)
 
     customer_id = customer['Customer_ID']
 
+    # Get the most recent order
     cursor.execute("""
         SELECT * FROM Orders
         WHERE Customer_ID = ?
@@ -299,10 +330,11 @@ def order_success():
 
     if not latest_order:
         conn.close()
-        return render_template('order_success.html', order_items=[], special=None)
+        return render_template('order_success.html', order_items=[], requested_delivery_time=None)
 
     order_id = latest_order['Order_ID']
 
+    # Get the ordered menu items
     cursor.execute("""
         SELECT m.Item_Name, oi.Quantity, m.Price
         FROM Order_Items oi
@@ -311,81 +343,33 @@ def order_success():
     """, (order_id,))
     order_items = cursor.fetchall()
 
-    cursor.execute("""
-        SELECT Request_Item FROM Special_Requests
-        WHERE Customer_ID = ? AND Request_Date = ? AND Time_Ordered = ?
-    """, (customer_id, latest_order['Date'], latest_order['Time_Ordered']))
-    special = cursor.fetchone()
+    # Format the requested delivery time if available
+    requested_delivery_time = latest_order['Requested_Delivery_Time']
+    if requested_delivery_time:
+        requested_delivery_time = datetime.strptime(requested_delivery_time, '%H:%M:%S').strftime('%I:%M %p')
 
     conn.close()
-    return render_template('order_success.html', order_items=order_items, special=special)
 
+    return render_template('order_success.html', order_items=order_items, requested_delivery_time=requested_delivery_time)
 
+import sqlite3
+import os
 
+# Define the database path
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'database', 'food_business.db')
 
-@app.route('/menu-management', methods=['GET', 'POST'])
-def menu_management():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
+# Create the database directory if it doesn't exist
+if not os.path.exists(os.path.dirname(DB_PATH)):
+    os.makedirs(os.path.dirname(DB_PATH))
 
-    # Handle adding a new item
-    if request.method == 'POST':
-        item_name = request.form['item_name']
-        category = request.form['category']
-        price = request.form['price']
+# Create a connection to the database
+conn = sqlite3.connect(DB_PATH)
+conn.execute('PRAGMA foreign_keys = ON')
+cursor = conn.cursor()
 
-        cursor.execute("INSERT INTO Menu_Items (Item_Name, Category, Price) VALUES (?, ?, ?)",
-                       (item_name, category, price))
-        conn.commit()
-        conn.close()
-        flash('Menu item added successfully.', 'success')
-        return redirect(url_for('menu_management'))
-
-    # Check for edit request
-    edit_id = request.args.get('edit_id')
-    item_to_edit = None
-    if edit_id:
-        cursor.execute("SELECT * FROM Menu_Items WHERE Item_ID = ?", (edit_id,))
-        item_to_edit = cursor.fetchone()
-
-    # Show all menu items
-    cursor.execute("SELECT * FROM Menu_Items")
-    menu_items = cursor.fetchall()
-    conn.close()
-
-    return render_template('menu_management.html', menu_items=menu_items, item_to_edit=item_to_edit)
-
-#edit menu items
-@app.route('/menu-management/edit/<int:item_id>', methods=['POST'])
-def edit_menu_item(item_id):
-    item_name = request.form['item_name']
-    category = request.form['category']
-    price = request.form['price']
-
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("UPDATE Menu_Items SET Item_Name = ?, Category = ?, Price = ? WHERE Item_ID = ?",
-                   (item_name, category, price, item_id))
-    conn.commit()
-    conn.close()
-
-    flash('Menu item updated successfully.', 'success')
-    return redirect(url_for('menu_management'))
-
-# delete menu items
-@app.route('/menu-management/delete/<int:item_id>', methods=['POST'])
-def delete_menu_item(item_id):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM Menu_Items WHERE Item_ID = ?", (item_id,))
-    conn.commit()
-    conn.close()
-
-    flash('Menu item deleted successfully.', 'info')
-    return redirect(url_for('menu_management'))
-
-
+conn.commit()
+conn.close()
 
 @app.route('/logout')
 def logout():
@@ -393,6 +377,7 @@ def logout():
     flash("You have been logged out.", "info")  # Flash a message to indicate successful logout
     return redirect(url_for('login'))  # Redirect to the login page
 
+print(f"Database and tables created at {DB_PATH}")
 
 if __name__ == '__main__':
     app.run(debug=True)

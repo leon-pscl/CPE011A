@@ -66,6 +66,12 @@
       color: #28a745;
       margin-bottom: 1rem;
     }
+
+    .delivery-time {
+      margin-top: 1rem;
+      font-weight: bold;
+      color: #333;
+    }
   </style>
 </head>
 <body>
@@ -84,6 +90,10 @@
           </li>
         {% endfor %}
       </ul>
+        <!-- Requested Delivery Time -->
+        {% if requested_delivery_time %}
+        <p class="delivery-time"><strong>Requested Delivery Time:</strong> {{ requested_delivery_time }}</p>
+      {% endif %}
     {% else %}
       <p>No regular menu items were ordered.</p>
     {% endif %}
@@ -91,6 +101,8 @@
     {% if special %}
       <p><strong>Special Request:</strong> {{ special['Request_Item'] }}</p>
     {% endif %}
+
+
 
     <a href="/" class="btn">Back to Home</a>
   </div>

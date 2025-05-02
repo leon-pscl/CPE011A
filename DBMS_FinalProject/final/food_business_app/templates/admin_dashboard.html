@@ -19,6 +19,15 @@
       <a href="{{ url_for('menu_management') }}">Manage Menu</a>
     </div>
 
+    <!-- Pending Special Requests Info -->
+    <div class="pending-requests-info">
+      <h3>Special Requests</h3>
+      <p>Pending Special Requests: {{ pending_requests }}</p>
+      <a href="{{ url_for('admin_special_requests') }}">
+        <button>Manage Special Requests</button>
+      </a>
+    </div>
+
     <h3>Order Log</h3>
     <table>
       <thead>
@@ -28,7 +37,7 @@
           <th>Office</th>
           <th>Date</th>
           <th>Time Ordered</th>
-          <th>Delivered</th>
+          <th>Delivered / Time</th> <!-- Merged column -->
           <th>Actions</th>
         </tr>
       </thead>
@@ -40,16 +49,17 @@
           <td data-label="Office">{{ order['Address'] }}</td>
           <td data-label="Date">{{ order['Date'] }}</td>
           <td data-label="Time Ordered">{{ order['Time_Ordered'] }}</td>
-          <td data-label="Delivered">{{ 'Yes' if order['Delivered'] else 'No' }}</td>
-          <td>
+          <td data-label="Delivered / Time">
             {% if not order['Delivered'] %}
-            <form action="{{ url_for('mark_delivered', order_id=order['Order_ID']) }}" method="post" style="display:inline;">
-              <button type="submit">Mark as Delivered</button>
-            </form>
+              <form action="{{ url_for('mark_delivered', order_id=order['Order_ID']) }}" method="post" style="display:inline;">
+                <button type="submit">Mark as Delivered</button>
+              </form>
             {% else %}
-              <span style="color: green;">✓ Delivered</span>
+              <span style="color: green;">Delivered at {{ order['Time_Delivered'] }}</span>
             {% endif %}
-
+          </td>
+          
+          <td>
             <a href="{{ url_for('order_details', order_id=order['Order_ID']) }}">
               <button>View Details</button>
             </a>

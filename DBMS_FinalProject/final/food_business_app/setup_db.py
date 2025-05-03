@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS Users (
 )
 ''')
 
-# ===== Categories table (new) =====
+# ===== Categories table =====
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Categories (
     Category_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS Customers (
 )
 ''')
 
-# ===== Orders and Order_Items tables =====
+# ===== Orders table =====
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Orders (
     Order_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS Orders (
 )
 ''')
 
+# ===== Order_Items table =====
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Order_Items (
     OrderItem_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -96,22 +97,53 @@ CREATE TABLE IF NOT EXISTS Special_Requests (
 )
 ''')
 
-# ===== Insert default categories (optional) =====
+# ===== Sales table =====
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS Sales (
+    Sale_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    Order_ID INTEGER NOT NULL,
+    Total_Amount REAL NOT NULL,
+    Payment_Method TEXT CHECK(Payment_Method IN ('Cash', 'Card', 'GCash', 'Other')) NOT NULL,
+    Payment_Status TEXT CHECK(Payment_Status IN ('Paid', 'Unpaid', 'Pending')) NOT NULL DEFAULT 'Unpaid',
+    Sale_Date DATE NOT NULL,
+    FOREIGN KEY (Order_ID) REFERENCES Orders(Order_ID)
+)
+''')
+
+# ===== Insert default categories =====
 cursor.execute('SELECT COUNT(*) FROM Categories')
 if cursor.fetchone()[0] == 0:
     default_categories = ['Regulars', 'Specials', 'Beverages']
     for category in default_categories:
         cursor.execute('INSERT INTO Categories (Category_Name) VALUES (?)', (category,))
-        
+
+# ===== Insert sample menu items =====
+cursor.execute('SELECT COUNT(*) FROM Menu_Items')
+if cursor.fetchone()[0] == 0:
+    sample_items = [
+        ("Tapsilog", "Regulars", 70.00),
+        ("Hotsilog", "Regulars", 70.00),
+        ("Japchae", "Specials", 110.00),
+        ("Carbonara", "Specials", 95.00),
+        ("Pepsi (Mismo)", "Beverages", 45.00),
+        ("Sprite (Mismo)", "Beverages", 45.00)
+    ]
+
+    for item in sample_items:
+        cursor.execute('''
+            INSERT INTO Menu_Items (Item_Name, Category, Price)
+            VALUES (?, ?, ?)
+        ''', item)
+
 # ===== Insert one admin account (optional) =====
 cursor.execute("SELECT * FROM Users WHERE Username = 'admin'")
 if not cursor.fetchone():
     cursor.execute('''
         INSERT INTO Users (First_Name, Last_Name, Full_Name, Username, Password, Address, Contact, Role)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', ("Admin", "User", "Admin User", "admin", "admin098", "HQ", "09123456789", "admin"))
+    ''', ("Admin", "", "Admin", "admin", "admin123", "HQ", "09123456789", "admin"))
 
-
+# ===== Finalize =====
 conn.commit()
 conn.close()
 print(f"Database and tables created at {DB_PATH}")

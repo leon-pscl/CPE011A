@@ -14,9 +14,17 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
   
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f4f6f8;
+    border-bottom: 1px solid #ddd;
+  }
+
   h1 {
+    text-align: left;
     color: #333;
-    text-align: center;
   }
   
   .order-items h3 {
@@ -49,6 +57,20 @@ body {
     background-color: #f1f1f1;
   }
   
+  /* === Button Styles === */
+button {
+  padding: 6px 12px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
   /* Back Button */
   .back-button {
     text-align: center;

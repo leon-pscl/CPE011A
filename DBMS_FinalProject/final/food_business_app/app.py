@@ -288,7 +288,8 @@ def mark_delivered(order_id):
     conn.close()
 
     # After updating, redirect to the admin dashboard
-    return redirect(url_for('admin_dashboard'))
+    next_url = request.form.get('next')
+    return redirect(next_url or url_for('admin_dashboard'))
 
 
 @app.route('/order_details/<int:order_id>')
@@ -308,21 +309,22 @@ def order_details(order_id):
     ''', (order_id,))
     order_items = cursor.fetchall()
 
-    # Fetch the requested delivery time for the given order ID
+    # Fetch delivery-related order info
     cursor.execute('''
-        SELECT Requested_Delivery_Time
+        SELECT Requested_Delivery_Time, Delivered, Time_Delivered
         FROM Orders
         WHERE Order_ID = ?
     ''', (order_id,))
-    requested_delivery_time = cursor.fetchone()
+    order_meta = cursor.fetchone()
 
     conn.close()
 
-    return render_template('order_details.html', 
-                           order_id=order_id, 
-                           order_items=order_items, 
-                           requested_delivery_time=requested_delivery_time['Requested_Delivery_Time'] if requested_delivery_time else None)
-
+    return render_template('order_details.html',
+                            order_id=order_id,
+                            order_items=order_items,
+                            requested_delivery_time=order_meta['Requested_Delivery_Time'] if order_meta else None,
+                            delivered=order_meta['Delivered'] if order_meta else None,
+                            time_delivered=order_meta['Time_Delivered'] if order_meta else None)
 
 @app.route('/order_success')
 def order_success():

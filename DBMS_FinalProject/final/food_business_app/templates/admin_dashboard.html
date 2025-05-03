@@ -43,6 +43,7 @@
           <td data-label="Delivered / Time">
             {% if not order['Delivered'] %}
               <form action="{{ url_for('mark_delivered', order_id=order['Order_ID']) }}" method="post">
+                <input type="hidden" name="next" value="{{ url_for('admin_dashboard') }}">
                 <button type="submit">Mark as Delivered</button>
               </form>
             {% else %}

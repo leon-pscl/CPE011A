@@ -8,11 +8,17 @@
 </head>
 <body>
   <div class="container">
-    <h1>Order ID: {{ order_id }}</h1>
+    <header>
+      <h1 class>Order ID: {{ order_id }}</h1>
+      <div class="auth-buttons">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn-back">Back to Dashboard</a>
+      </div>
+    </header>
+    
 
     <!-- Order Items Section -->
     <div class="order-items">
-      <h3>Order Details</h3>
+      <h2>Order Details</h2>
       <table class="order-table">
         <thead>
           <tr>
@@ -43,10 +49,17 @@
       </div>
     {% endif %}
 
-    <!-- Back Button -->
-    <div class="back-button">
-      <a href="{{ url_for('admin_dashboard') }}" class="btn-back">Back to Dashboard</a>
+    <div class="mark-delivered">
+      {% if not delivered %}
+        <form action="{{ url_for('mark_delivered', order_id=order_id) }}" method="post">
+          <input type="hidden" name="next" value="{{ url_for('order_details', order_id=order_id) }}">
+          <button type="submit" class="btn-mark-delivered">Mark as Delivered</button>
+        </form>
+      {% else %}
+        <p style="color: green;">Delivered at {{ time_delivered }}</p>
+      {% endif %}
     </div>
+    
   </div>
 </body>
 </html>

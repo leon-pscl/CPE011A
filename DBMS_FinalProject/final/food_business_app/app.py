@@ -3,6 +3,8 @@ import sqlite3
 import os
 from datetime import datetime
 import re
+from utils import insert_sale
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -173,7 +175,12 @@ def home():
 
         conn.commit()
         conn.close()
+
+        # Record sale after order is successfully created
+        insert_sale(order_id)
+
         return redirect(url_for('order_success'))
+
 
     conn.close()
     return render_template(
@@ -192,6 +199,8 @@ def admin_dashboard():
 
     conn = get_db_connection()
     cursor = conn.cursor()
+
+    # Get basic order info
     cursor.execute("""
         SELECT o.Order_ID, c.Name AS Customer_Name, c.Address, o.Date, o.Time_Ordered, o.Delivered
         FROM Orders o
@@ -199,10 +208,31 @@ def admin_dashboard():
         ORDER BY o.Date DESC, o.Time_Ordered DESC
     """)
     orders = cursor.fetchall()
+
+    # Build list of orders with items and total
+    detailed_orders = []
+    for order in orders:
+        order_id = order['Order_ID']
+        cursor.execute("""
+            SELECT m.Item_Name, oi.Quantity, m.Price, (oi.Quantity * m.Price) AS Subtotal
+            FROM Order_Items oi
+            JOIN Menu_Items m ON m.Item_ID = oi.Item_ID
+            WHERE oi.Order_ID = ?
+        """, (order_id,))
+        items = cursor.fetchall()
+        total = sum([item['Subtotal'] for item in items])
+        item_summary = ", ".join([f"{item['Item_Name']} (x{item['Quantity']})" for item in items])
+
+        detailed_orders.append({
+            **order,
+            'Items': item_summary,
+            'Total': f"{total:.2f}"
+        })
+
+    total_sales = sum(float(order['Total']) for order in detailed_orders)
+
     conn.close()
-
-    return render_template('admin_dashboard.html', orders=orders)
-
+    return render_template('admin_dashboard.html', orders=detailed_orders, total_sales=total_sales)
 
 @app.route('/order_success')
 def order_success():
@@ -320,8 +350,6 @@ def delete_menu_item(item_id):
 
     flash('Menu item deleted successfully.', 'info')
     return redirect(url_for('menu_management'))
-
-
 
 @app.route('/logout')
 def logout():

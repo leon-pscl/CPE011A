@@ -425,7 +425,19 @@ def menu_management():
             conn.commit()
 
     # Fetch menu items
-    cursor.execute("SELECT Item_ID, Item_Name, Category, Price FROM Menu_Items")
+    cursor.execute("""
+    SELECT Item_ID, Item_Name, Category, Price 
+    FROM Menu_Items
+    ORDER BY 
+        CASE Category
+            WHEN 'Regulars' THEN 1
+            WHEN 'Specials' THEN 2
+            WHEN 'Beverages' THEN 3
+            WHEN 'Extras' THEN 4
+            ELSE 5
+        END
+""")
+
     menu_items = cursor.fetchall()
 
     # Handle Edit Form

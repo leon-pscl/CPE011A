@@ -7,10 +7,13 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='styles_menu_management.css') }}">
 </head>
 <body>
-
-  <h1>Manage Menu Items</h1>
-  <a href="{{ url_for('admin_dashboard') }}" class="cancel-link" style="display:inline-block; margin-bottom:1rem;">&larr; Back to Dashboard</a>
-
+  <header>
+    <a href="menu_management" class="logo">Manage Menu Items</a>
+    <div class="auth-buttons">
+      <a class="btn-backdash" href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a>
+    </div>
+  </header>
+<div class="divider">
   <!-- Flash messages -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -36,6 +39,7 @@
       <option value="Regulars" {% if item_to_edit['Category'] == 'Regulars' %}selected{% endif %}>Regulars</option>
       <option value="Specials" {% if item_to_edit['Category'] == 'Specials' %}selected{% endif %}>Specials</option>
       <option value="Beverages" {% if item_to_edit['Category'] == 'Beverages' %}selected{% endif %}>Beverages</option>
+      <option value="Extras" {% if item_to_edit['Category'] == 'Extras' %}selected{% endif %}>Extras</option>
     </select>
 
     <label for="price">Price:</label>
@@ -56,6 +60,7 @@
       <option value="Regulars">Regulars</option>
       <option value="Specials">Specials</option>
       <option value="Beverages">Beverages</option>
+      <option value="Extras">Extras</option>
     </select>
 
     <label for="price">Price:</label>
@@ -102,5 +107,6 @@
       </tbody>
     </table>
   </div>
+</div>
 </body>
 </html>

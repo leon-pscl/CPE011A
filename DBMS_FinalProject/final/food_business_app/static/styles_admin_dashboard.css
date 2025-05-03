@@ -1,98 +1,151 @@
+/* === Global Styles === */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f6f8;
-    margin: 0;
-    padding: 2rem;
-  }
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f8;
+  margin: 0;
+  padding: 2rem;
+}
 
-  h2, h3 {
-    text-align: center;
-    color: #333;
-  }
+h2, h3 {
+  text-align: left;
+  color: #333;
+  margin-left: 1rem;
+}
 
-  .logout {
-    text-align: right;
-    margin-bottom: 1rem;
-  }
+/* === Header Flex Layout === */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem; /* reduced padding */
+  background-color: #f4f6f8;
+  border-bottom: 1px solid #ddd;
+}
 
-  .logout a {
-    text-decoration: none;
-    color: #fff;
-    background-color: #d9534f;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-  }
+/* === Logo === */
+.logo {
+  font-size: 2rem;
+  font-weight: bold;
+  text-decoration: none;
+  color: #333;
+}
 
-  .logout a:hover {
-    background-color: #c9302c;
-  }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1.5rem;
-    background-color: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  }
 
-  th, td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid #eee;
+/* === Auth Buttons === */
+.auth-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+/* === Table Styles === */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+th, td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  background-color: #007bff;
+  color: white;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* === Responsive Table === */
+@media (max-width: 768px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
   }
 
   th {
-    background-color: #007bff;
-    color: white;
+    display: none;
   }
 
-  tr:hover {
-    background-color: #f1f1f1;
+  td {
+    position: relative;
+    padding-left: 50%;
   }
 
-  @media (max-width: 768px) {
-    table, thead, tbody, th, td, tr {
-      display: block;
-    }
-
-    th {
-      display: none;
-    }
-
-    td {
-      position: relative;
-      padding-left: 50%;
-    }
-
-    td::before {
-      content: attr(data-label);
-      position: absolute;
-      left: 1rem;
-      font-weight: bold;
-      color: #333;
-    }
-  }
-
-  button {
-    padding: 6px 12px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-  
-  button:hover {
-    background-color: #45a049;
-  }
-
-  form {
-      display: inline;
+  td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 1rem;
+    font-weight: bold;
+    color: #333;
   }
 }
 
-/* Add this to styles_admin_dashboard.css */
+/* === Button Styles === */
+button {
+  padding: 6px 12px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+/* logout button */
+.logout-link {
+  background: #d9534f;
+  color: #fffaf0;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+}
+
+.logout-link:hover {
+  background-color: #c9302c;
+}
+
+/* === Custom Buttons === */
+.btn-manage {
+  background: #d70f64;
+  color: #fffaf0;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+}
+
+.btn-manage:hover {
+  background-color: #b70c55;
+}
+
+.btn-login:hover {
+  background-color: #fffaf0;
+  color: #d70f64;
+}
+
+form {
+  display: inline;
+}
+
+/* === Pagination === */
 .pagination {
   text-align: center;
   margin-top: 20px;
@@ -115,4 +168,3 @@ body {
 .pagination a:hover {
   background-color: #ddd;
 }
-

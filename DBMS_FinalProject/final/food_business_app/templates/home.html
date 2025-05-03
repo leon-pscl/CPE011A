@@ -50,7 +50,8 @@
       <div class="section">
         <h2>Menu Items</h2>
         <div class="menu-columns">
-          {% for category in ['Regulars', 'Specials', 'Beverages'] %}
+          {% for category in menu_items | map(attribute='Category') | unique %}
+
             <div>
               <h3>{{ category }}</h3>
               {% for item in menu_items if item['Category'] == category %}

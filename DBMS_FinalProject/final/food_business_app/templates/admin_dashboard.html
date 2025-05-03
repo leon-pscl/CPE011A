@@ -2,24 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Admin Dashboard</title>
+  <title>Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="{{ url_for('static', filename='styles_admin_dashboard.css') }}">
 </head>
 <body>
-  <div class="container">
-    <h2>Admin Dashboard</h2>
 
-    <div class="logout">
+  <!-- Header -->
+  <header>
+    <a href="admin_dashboard" class="logo">Foodie - Admin</a>
+    <div class="auth-buttons">
+      <a class="btn-manage" href="{{ url_for('menu_management') }}">Manage Menu</a>
       <a class="logout-link" href="{{ url_for('logout') }}">Logout</a>
     </div>
+  </header>
 
-    <!-- Link to Menu Management -->
-    <div class="menu-management-link">
-      <a href="{{ url_for('menu_management') }}">Manage Menu</a>
-    </div>
-
-    <h3>Order Log</h3>
+  <!-- Main Content -->
+  <main>
+    <h2>Order Log</h2>
     <table>
       <thead>
         <tr>
@@ -28,7 +28,7 @@
           <th>Office</th>
           <th>Date</th>
           <th>Time Ordered</th>
-          <th>Delivered / Time</th> <!-- Merged column -->
+          <th>Delivered / Time</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -42,14 +42,13 @@
           <td data-label="Time Ordered">{{ order['Time_Ordered'] }}</td>
           <td data-label="Delivered / Time">
             {% if not order['Delivered'] %}
-              <form action="{{ url_for('mark_delivered', order_id=order['Order_ID']) }}" method="post" style="display:inline;">
+              <form action="{{ url_for('mark_delivered', order_id=order['Order_ID']) }}" method="post">
                 <button type="submit">Mark as Delivered</button>
               </form>
             {% else %}
               <span style="color: green;">Delivered at {{ order['Time_Delivered'] }}</span>
             {% endif %}
           </td>
-          
           <td>
             <a href="{{ url_for('order_details', order_id=order['Order_ID']) }}">
               <button>View Details</button>
@@ -74,6 +73,7 @@
         <a href="{{ url_for('admin_dashboard', page=current_page + 1) }}">Next</a>
       {% endif %}
     </div>
-  </div>
+  </main>
+
 </body>
 </html>

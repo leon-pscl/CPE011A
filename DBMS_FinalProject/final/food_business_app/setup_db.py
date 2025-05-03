@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS Special_Requests (
 # ===== Insert default categories (optional) =====
 cursor.execute('SELECT COUNT(*) FROM Categories')
 if cursor.fetchone()[0] == 0:
-    default_categories = ['Regulars', 'Specials', 'Beverages']
+    default_categories = ['Regulars', 'Specials', 'Beverages','Extras']
     for category in default_categories:
         cursor.execute('INSERT INTO Categories (Category_Name) VALUES (?)', (category,))
         

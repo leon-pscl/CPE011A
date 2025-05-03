@@ -34,12 +34,14 @@
         <tr>
           <th>Order ID</th>
           <th>Customer Name</th>
-          <th>Office</th>
+          <th>Address</th>
           <th>Date</th>
           <th>Time Ordered</th>
           <th>Delivered</th>
+          <th>Items Ordered</th>
+          <th>Total Price</th>
         </tr>
-      </thead>
+      </thead>      
       <tbody>
         {% for order in orders %}
         <tr>
@@ -49,9 +51,17 @@
           <td data-label="Date">{{ order['Date'] }}</td>
           <td data-label="Time Ordered">{{ order['Time_Ordered'] }}</td>
           <td data-label="Delivered">{{ 'Yes' if order['Delivered'] else 'No' }}</td>
+          <td data-label="Items Ordered">{{ order['Items'] }}</td>
+          <td data-label="Total Price">₱{{ order['Total'] }}</td>
         </tr>
         {% endfor %}
       </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="7" style="text-align: right;"><strong>Total Sales:</strong></td>
+          <td><strong>₱{{ "%.2f"|format(total_sales) }}</strong></td>
+        </tr>
+      </tfoot>          
     </table>
   </div>
 </body>

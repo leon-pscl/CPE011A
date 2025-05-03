@@ -1,40 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Order Page</title>
+  <meta charset="UTF-8">
+  <title>{% if user_logged_in %}Welcome {{ full_name }}{% else %}Welcome to Foodie{% endif %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles_home.css') }}">
 </head>
 <body>
-    <h2>Welcome, {{ full_name }}</h2>
+  <!-- Header -->
+  <header>
+    <div>
+      <a href="/" class="logo">Foodie</a>
+    </div>
+    <div class="auth-buttons">
+      {% if not user_logged_in %}
+        <a href="{{ url_for('login') }}" class="btn-login">Login</a>
+        <a href="{{ url_for('register') }}" class="btn-signup">Sign Up</a>
+      {% else %}
+        <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+      {% endif %}
+    </div>
+  </header>
 
-    <form method="POST">
-        <label for="customer_name">Name:</label>
-        <input type="text" name="customer_name" value="{{ full_name }}" readonly><br><br>
+  <div class="container">
+    {% if user_logged_in %}
+      <h1>Welcome, {{ full_name }}</h1>
+      <div class="section">
+        <p><strong>Name:</strong> {{ full_name }}</p>
+        <p><strong>Address:</strong> {{ address }}</p>
+      </div>
+    {% else %}
+      <h1>Welcome to Foodie!</h1>
+      <p>Please <a href="{{ url_for('login') }}">log in</a> or <a href="{{ url_for('register') }}">sign up</a> to place an order.</p>
+    {% endif %}
 
-        <label for="office">Address:</label>
-        <input type="text" name="office" value="{{ address }}" readonly><br><br>
+    <form method="POST" {% if not user_logged_in %} onsubmit="event.preventDefault(); window.location.href='{{ url_for('login') }}';" {% endif %}>
+      <!-- Order Type -->
+      <div class="section">
+        <h3>Order Type</h3>
+        <select name="order_type" {% if not user_logged_in %}disabled{% endif %} required>
+          <option value="">Select order type</option>
+          <option value="Walk-in">Walk-in</option>
+          <option value="Delivery">Delivery</option>
+        </select>
+      </div>
 
-        <h3>Menu Items</h3>
-        {% for item in menu_items %}
+      <!-- Menu Items -->
+      <div class="section">
+        <h2>Menu Items</h2>
+        <div class="menu-columns">
+          {% for category in ['Regulars', 'Specials', 'Beverages'] %}
             <div>
-                <input type="checkbox" name="item" value="{{ item['Item_ID'] }}">
-                {{ item['Name'] }} - {{ item['Price'] }}
-                Quantity:
-                <input type="number" name="quantity" min="0" value="0">
+              <h3>{{ category }}</h3>
+              {% for item in menu_items if item['Category'] == category %}
+                <div class="menu-item">
+                  <label>
+                    <input type="checkbox" name="item" value="{{ item['Item_ID'] }}" {% if not user_logged_in %}disabled{% endif %}>
+                    {{ item['Item_Name'] }} (₱{{ '%.2f'|format(item['Price']) }})
+                  </label>
+                  Quantity:
+                  <input type="number" name="quantity_{{ item['Item_ID'] }}" value="0" min="0" {% if not user_logged_in %}disabled{% endif %}>
+                </div>
+              {% endfor %}
             </div>
-        {% endfor %}
+          {% endfor %}
+        </div>
+      </div>
 
+      <!-- Special Order -->
+      <div class="section">
         <h3>Special Order</h3>
-        <label for="special_order">Enter item not on menu:</label>
-        <input type="text" name="special_order"><br><br>
+        <input type="text" name="special_order" placeholder="Enter item not on menu" style="width: 100%;" {% if not user_logged_in %}disabled{% endif %}>
+      </div>
 
-        <label for="delivery_date">Delivery Date:</label>
-        <input type="date" name="delivery_date" required><br><br>
+      <!-- Delivery Date -->
+      <div class="section">
+        <h3>Delivery Date</h3>
+        <input type="date" name="delivery_date" {% if not user_logged_in %}disabled{% endif %} required>
+      </div>
 
-        <button type="submit">Place Order</button>
+      <button type="submit" class="button_ani">
+        <span>{% if user_logged_in %}Place Order{% else %}Login to Order{% endif %}</span>
+      </button>
     </form>
-
-    <form action="{{ url_for('logout') }}" method="get" style="margin-top: 20px;">
-        <button type="submit">Logout</button>
-    </form>
+  </div>
 </body>
 </html>

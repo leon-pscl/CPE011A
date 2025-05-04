@@ -1,0 +1,165 @@
+/* CSS for special_requests.html */
+
+/* for the whole page */
+a {
+    text-decoration: none;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0;
+    padding: 2rem;
+  }
+  
+  .container {
+    max-width: 900px;
+    margin: auto;
+    background: #fffaf0;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  h1 {
+    border-bottom: 1px solid #e0d5c0;
+    padding-bottom: 8px;
+  }
+
+  h2.warning {
+    color: #d9534f;
+  }
+  
+  .logout-link {
+    background: #d9534f;
+    color: #fffaf0;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+  }
+  
+  .logout-link:hover {
+    background-color: #c9302c;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  textarea {
+    width: 100%;
+    height: 120px;
+    padding: 10px;
+    border: 1px solid #c19a6b;
+    border-radius: 4px;
+    font-size: 1rem;
+    resize: none;
+  }
+  
+  button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #c19a6b;
+    color: #202020;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-weight: bold;
+  }
+  
+  button:hover {
+    background-color: #fffaf0;
+    color: #202020;
+  }
+  
+  .section {
+    margin: 25px 0;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #fffaf0;
+    border-left: 5px solid #c19a6b;
+  }
+  
+  .message {
+    text-align: center;
+    color: #e74c3c;
+    font-size: 1.1rem;
+  }
+  
+  /* Style for the header to display logo and buttons in a row */
+  header {
+    display: flex;
+    justify-content: space-between; /* Pushes logo to the left and buttons to the right */
+    align-items: center; /* Vertically aligns the items in the center */
+    padding: 10px 20px; /* Adds some padding to the header */
+  }
+  
+  /* Logo style */
+  .logo {
+    font-size: 2rem;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  /* Style for the container of the login and signup buttons */
+  .auth-buttons {
+    display: flex;
+    gap: 1rem; /* Space between buttons */
+  }
+  
+  /* Login button style */
+  .btn-back {
+    background: #635b5f;
+    color: #fffaf0;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-back:hover {
+    background-color: #fffaf0;
+    color: #635b5f;
+  }
+  
+  /* Logout button style */
+  .btn-logout {
+    background: #d9534f;
+    color: #fffaf0;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-logout:hover {
+    background-color: #c9302c;
+  }
+  
+
+  /* Hide quantity input by default */
+  .menu-item .quantity-wrapper {
+    display: none;
+  }
+  
+  /* size of the textarea in the form*/
+  textarea {
+    width: 100%;
+    height: auto; /* Let the height grow */
+    min-height: 1em; /* Minimum height for one line (adjust to font size) */
+    resize: vertical; /* Allow vertical resizing */
+
+}

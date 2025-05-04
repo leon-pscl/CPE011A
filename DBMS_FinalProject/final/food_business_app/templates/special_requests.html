@@ -2,14 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Special Requests</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Special Orders</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles_special_requests.css') }}">
+    <script src="{{ url_for('static', filename='scripts_specials.js') }}"></script>
+
 </head>
 <body>
     <header>
         <a href="/" class="logo">Foodie</a>
         <div class="auth-buttons">
             {% if user_logged_in %}
+                <a href="/" class="btn-back">Back to Order Page</a>
                 <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
             {% else %}
                 <a href="{{ url_for('login') }}" class="btn-login">Login</a>
@@ -19,16 +23,30 @@
 
     <div class="container">
         {% if user_logged_in %}
-            <h1>Manage Special Requests</h1>
+            <h1>Special Order</h1>
+            <h2>Cravings not on the menu? Let us know what you want.</h2>
+            <ul>
+                <li>Dish or item you want that is not on the menu.</li>
+                <li>Your order will be delivered at the preferred delivery date and time</li>
+            </ul>
             <form method="POST">
                 <div class="section">
-                    <label for="special_request">Special Request:</label>
-                    <textarea id="special_request" name="special_request" required></textarea>
+                    <h3>State details about your special order here.</h3>
+                    <textarea id="special_request" name="special_request" required oninput="autoResizeTextarea(event)"></textarea>
+
                 </div>
-                <button type="submit" class="button_ani">Submit Request</button>
+
             </form>
+
+            <h2 class = "warning">Note:</h2>
+            <ul>
+                <li>Same-day special orders are not allowed. Best we can do is deliver your special order in the next day.</li>
+                <li>Special orders would still go through approval.</li>
+                <li>Once you place a special order, we will contact you about your special order's status.</li>
+            </ul>
+            <button>Submit Request</button>
         {% else %}
-            <h1>Please log in to manage your special requests.</h1>
+            <h1 class="message">Please log in to manage your special requests.</h1>
         {% endif %}
     </div>
 </body>

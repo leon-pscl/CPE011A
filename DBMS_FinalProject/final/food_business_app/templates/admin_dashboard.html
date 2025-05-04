@@ -12,6 +12,7 @@
   <header>
     <a href="admin_dashboard" class="logo">Foodie - Admin</a>
     <div class="auth-buttons">
+      <a class="btn-manage" href="{{ url_for('sales_summary') }}">Sales</a>
       <a class="btn-manage" href="{{ url_for('request_management') }}">Manage Requests</a>
       <a class="btn-manage" href="{{ url_for('menu_management') }}">Manage Menu</a>
       <a class="logout-link" href="{{ url_for('logout') }}">Logout</a>

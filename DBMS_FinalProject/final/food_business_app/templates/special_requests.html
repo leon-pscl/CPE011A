@@ -6,7 +6,6 @@
     <title>Special Orders</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles_special_requests.css') }}">
     <script src="{{ url_for('static', filename='scripts_specials.js') }}"></script>
-
 </head>
 <body>
     <header>
@@ -32,19 +31,18 @@
             <form method="POST">
                 <div class="section">
                     <h3>State details about your special order here.</h3>
-                    <textarea id="special_request" name="special_request" required oninput="autoResizeTextarea(event)"></textarea>
-
+                    <textarea id="special_request" name="special_request" required oninput="autoResizeTextarea(event)" rows="5" cols="50">{{ request.special_request }}</textarea>
                 </div>
-
+                <h2 class="warning">Note:</h2>
+                <ul>
+                    <li>Same-day special orders are not allowed. Best we can do is deliver your special order in the next day.</li>
+                    <li>Special orders would still go through approval.</li>
+                    <li>Once you place a special order, we will contact you about your special order's status.</li>
+                </ul>
+                <button type="submit">Submit Request</button>
             </form>
 
-            <h2 class = "warning">Note:</h2>
-            <ul>
-                <li>Same-day special orders are not allowed. Best we can do is deliver your special order in the next day.</li>
-                <li>Special orders would still go through approval.</li>
-                <li>Once you place a special order, we will contact you about your special order's status.</li>
-            </ul>
-            <button>Submit Request</button>
+
         {% else %}
             <h1 class="message">Please log in to manage your special requests.</h1>
         {% endif %}

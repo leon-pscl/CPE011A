@@ -93,6 +93,7 @@ def login():
             session['user'] = user['Username']
             session['full_name'] = user['Full_Name']
             session['address'] = user['Address']
+            session['contact'] = user['Contact']
             session['role'] = user['Role']
             return redirect(url_for('home'))
         else:
@@ -122,6 +123,7 @@ def home():
             return redirect(url_for('login'))
 
         customer_name = full_name
+        contact = session.get('contact')
         selected_items = request.form.getlist('item_ids[]')
         requested_delivery_time = request.form['requested_delivery_time']
         order_type = request.form['order_type']
@@ -132,7 +134,7 @@ def home():
         if customer:
             customer_id = customer['Customer_ID']
         else:
-            cursor.execute("INSERT INTO Customers (Name, Address) VALUES (?, ?)", (customer_name, address))
+            cursor.execute('''INSERT INTO Customers (Name, Address, Phone) VALUES (?, ?, ?)''', (full_name, address, contact))
             conn.commit()
             customer_id = cursor.lastrowid
 
@@ -177,43 +179,209 @@ def special_requests():
     user_logged_in = 'user' in session
     full_name = session.get('full_name')
     address = session.get('address')
-
+    contact = session.get('contact')
+    
     if request.method == 'POST':
         request_item = request.form['special_request']
         if len(request_item) > 0:
             conn = get_db_connection()
             cursor = conn.cursor()
 
-            cursor.execute('''
-                SELECT Customer_ID FROM Customers WHERE Name = ? AND Address = ?
-            ''', (full_name, address))
+            cursor.execute('''SELECT Customer_ID FROM Customers WHERE Name = ? AND Address = ?''', (full_name, address))
             customer = cursor.fetchone()
 
             if customer:
                 customer_id = customer['Customer_ID']
             else:
-                cursor.execute('''
-                    INSERT INTO Customers (Name, Address) VALUES (?, ?)
-                ''', (full_name, address))
+                cursor.execute('''INSERT INTO Customers (Name, Address, Phone) VALUES (?, ?, ?)''', (full_name, address, contact))
                 conn.commit()
                 customer_id = cursor.lastrowid
 
-            cursor.execute('''
-                INSERT INTO Special_Requests (Customer_ID, Request_Item, Request_Date, Time_Ordered, Approved)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (customer_id, request_item, datetime.now().date(), datetime.now(), False))
-            
+            now = datetime.now()
+            date_str = now.strftime('%d-%m-%Y')
+            time_str = now.strftime('%H:%M:%S')
+
+            # Insert into Special_Requests table, ensuring proper date and time handling
+            cursor.execute('''INSERT INTO Special_Requests (Customer_ID, Request_Item, Request_Date, Request_Time, Time_Ordered, Approved) 
+                  VALUES (?, ?, ?, ?, ?, ?)''', 
+                (customer_id, request_item, now.strftime('%Y-%m-%d'), now.time().isoformat(), now.isoformat(), False))
+
             conn.commit()
             conn.close()
 
             flash("Special request added successfully.", "success")
-            return redirect(url_for('home'))
+            return redirect(url_for('request_success'))  # Redirect to request_success page
+
         else:
             flash("Please enter a special request.", "error")
             return redirect(url_for('special_requests'))
 
     return render_template('special_requests.html', user_logged_in=user_logged_in, full_name=full_name, address=address)
 
+@app.route('/request_success')
+def request_success():
+    # Check if the user is logged in, if not, redirect them to login
+    if 'user' not in session:
+        return redirect(url_for('login'))
+
+    user_logged_in = 'user' in session
+    return render_template('request_success.html', user_logged_in=user_logged_in)
+
+
+"""FOR REQUEST MANAGEMENT PAGE"""
+from datetime import datetime
+
+@app.route('/request_management')
+def request_management():
+    if session.get('role') != 'admin':
+        return redirect(url_for('home'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(''' 
+        SELECT 
+            sr.Request_ID AS id,
+            c.Name AS customer_name,
+            c.Phone AS customer_phone,
+            sr.Request_Item AS special_request,
+            sr.Request_Date AS request_date,
+            sr.Request_Time AS request_time,
+            sr.Time_Ordered AS time_ordered,
+            sr.Time_Delivered AS time_delivered,
+            sr.Approved AS approved,
+            sr.Time_Approved AS time_approved,
+            sr.Time_Rejected AS time_rejected,
+            CASE 
+                WHEN sr.Time_Rejected IS NOT NULL THEN 1 
+                ELSE 0 
+            END AS rejected
+        FROM Special_Requests sr
+        JOIN Customers c ON sr.Customer_ID = c.Customer_ID
+        ORDER BY sr.Time_Ordered DESC
+
+    ''')
+
+    requests = cursor.fetchall()
+
+    # Convert sqlite3.Row objects to dictionaries to allow item assignment
+    requests_dict = [dict(request) for request in requests]
+
+    # Format time_ordered for each request
+    for request in requests_dict:
+        if request['time_ordered']:
+            # Convert the string to a datetime object, allowing for fractional seconds
+            try:
+                time_ordered_obj = datetime.strptime(request['time_ordered'], '%Y-%m-%dT%H:%M:%S.%f')
+            except ValueError:
+                # Fallback in case there's no fractional part
+                time_ordered_obj = datetime.strptime(request['time_ordered'], '%Y-%m-%dT%H:%M:%S')
+            
+            # Then format it
+            request['time_ordered'] = time_ordered_obj.strftime('%d %B %Y | %H:%M:%S')
+
+    conn.close()
+
+    return render_template('request_management.html', requests=requests_dict, user_logged_in=True)
+
+
+
+from datetime import datetime
+
+@app.route('/approve_request/<int:request_id>')
+def approve_request(request_id):
+    if session.get('role') != 'admin':
+        return redirect(url_for('home'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Proper format for database storage
+    cursor.execute('''
+        UPDATE Special_Requests
+        SET Approved = 1,
+            Time_Approved = ?
+        WHERE Request_ID = ?
+    ''', (now, request_id))
+
+    conn.commit()
+    conn.close()
+
+    flash("Request approved.", "success")
+    return redirect(url_for('request_management'))
+
+
+@app.route('/reject_request/<int:request_id>')
+def reject_request(request_id):
+    if session.get('role') != 'admin':
+        return redirect(url_for('home'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Proper format for database storage
+    cursor.execute('''
+        UPDATE Special_Requests
+        SET Approved = 0,
+            Time_Rejected = ?
+        WHERE Request_ID = ?
+    ''', (now, request_id))
+
+    conn.commit()
+    conn.close()
+
+    flash("Request rejected.", "warning")
+    return redirect(url_for('request_management'))
+
+
+@app.route('/mark_special_request_delivered/<int:request_id>', methods=['POST'])
+def mark_special_request_delivered(request_id):
+    if session.get('role') != 'admin':
+        return redirect(url_for('home'))
+
+    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Proper format for database storage
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        UPDATE Special_Requests
+        SET Time_Delivered = ?
+        WHERE Request_ID = ?
+    ''', (current_time, request_id))
+
+    conn.commit()
+    conn.close()
+
+    next_url = request.form.get('next')
+    return redirect(next_url or url_for('request_management'))
+
+
+@app.route('/edit_request_time/<int:request_id>', methods=['POST'])
+def edit_request_time(request_id):
+    if session.get('role') != 'admin':
+        return redirect(url_for('home'))
+
+    new_date = request.form['request_date']
+    new_time = request.form['request_time']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        UPDATE Special_Requests
+        SET Request_Date = ?, Request_Time = ?
+        WHERE Request_ID = ?
+    ''', (new_date, new_time, request_id))
+
+    conn.commit()
+    conn.close()
+
+    flash("Requested delivery time updated.", "success")
+    return redirect(url_for('request_management'))
+
+
+"""END REQUEST MANAGEMENT PAGE"""
 @app.route('/admin_dashboard')
 def admin_dashboard():
     if session.get('role') != 'admin':

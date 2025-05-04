@@ -57,7 +57,9 @@ cursor.execute('''
 CREATE TABLE IF NOT EXISTS Customers (
     Customer_ID INTEGER PRIMARY KEY AUTOINCREMENT,
     Name TEXT NOT NULL,
-    Address TEXT NOT NULL
+    Address TEXT NOT NULL,
+    Phone TEXT NOT NULL,
+    FOREIGN KEY (Phone) REFERENCES Users(Contact)
 )
 ''')
 
@@ -94,9 +96,12 @@ CREATE TABLE IF NOT EXISTS Special_Requests (
     Customer_ID INTEGER,
     Request_Item TEXT NOT NULL,
     Request_Date DATE NOT NULL,
+    Request_Time TIME NOT NULL,
     Time_Ordered DATETIME NOT NULL,
     Time_Delivered DATETIME,
     Approved BOOLEAN NOT NULL,
+    Time_Approved DATETIME,
+    Time_Rejected DATETIME,
     FOREIGN KEY (Customer_ID) REFERENCES Customers(Customer_ID)
 )
 ''')
@@ -107,7 +112,7 @@ if cursor.fetchone()[0] == 0:
     default_categories = ['Regulars', 'Specials', 'Beverages','Extras']
     for category in default_categories:
         cursor.execute('INSERT INTO Categories (Category_Name) VALUES (?)', (category,))
-        
+"""      
 # ===== Insert one admin account (optional) =====
 cursor.execute("SELECT * FROM Users WHERE Username = 'admin'")
 if not cursor.fetchone():
@@ -115,8 +120,7 @@ if not cursor.fetchone():
         INSERT INTO Users (First_Name, Last_Name, Full_Name, Username, Password, Address, Contact, Role)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ''', ("Admin", "User", "Admin User", "Admin", "Heisenberg", "Albuquerque-HQ", "1-505-503-4455", "admin"))
-
-
+"""
 conn.commit()
 conn.close()
 

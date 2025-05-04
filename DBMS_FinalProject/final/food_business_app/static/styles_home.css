@@ -26,14 +26,19 @@ h1, h2, h3 {
 }
 
 .logout-link {
-  float: right;
-  font-size: 0.9em;
-  color: #6f4e37;
+  background: #d9534f;
+  color: #fffaf0;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
   text-decoration: none;
 }
 
 .logout-link:hover {
-  text-decoration: underline;
+  background-color: #c9302c;
 }
 
 .menu-columns {

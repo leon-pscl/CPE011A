@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>{% if user_logged_in %}Welcome {{ full_name }}{% else %}Welcome to Foodie{% endif %}</title>
+  <title>{% if user_logged_in %}Welcome, {{ full_name }}{% else %}Welcome to Foodie{% endif %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles_home.css') }}">
   <script src="{{ url_for('static', filename='scripts_home.js') }}"></script>
 
@@ -18,7 +18,7 @@
         <a href="{{ url_for('login') }}" class="btn-login">Login</a>
         <a href="{{ url_for('register') }}" class="btn-signup">Sign Up</a>
       {% else %}
-        <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+        <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
       {% endif %}
     </div>
   </header>

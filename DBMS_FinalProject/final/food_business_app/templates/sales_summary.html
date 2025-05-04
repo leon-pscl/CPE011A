@@ -9,7 +9,7 @@
     <header>
         <a href="/" class="logo">Sales Summary</a>
         <div class="auth-buttons">
-            <a class="btn-backdash" href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a>
+            <a class="btn-manage" href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a>
         </div>
     </header>
 
@@ -28,6 +28,26 @@
         <!-- Special Requests Sales Summary -->
         <section class="sales-summary">
             <h2>Special Requests Sales</h2>
+            <!-- Special Requests Filter Form -->
+            <form method="get" action="{{ url_for('sales_summary') }}">
+                <label for="start_date">Start Date:</label>
+                <input type="date" name="start_date" value="{{ start_date }}">
+
+                <label for="end_date">End Date:</label>
+                <input type="date" name="end_date" value="{{ end_date }}">
+
+                <label for="customer_name">Customer:</label>
+                <select name="customer_name">
+                    <option value="">All Customers</option>
+                    {% for customer in customer_names %}
+                        <option value="{{ customer.Name }}" {% if customer.Name == customer_name_filter %} selected {% endif %}>{{ customer.Name }}</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="btn-manage">Filter</button>
+                <a href="{{ url_for('sales_summary') }}" class="clear-filter">Clear Filter</a>
+            </form>
+
             {% if delivered_requests %}
                 <table>
                     <thead>
@@ -58,6 +78,26 @@
         <!-- Regular Orders Sales Summary -->
         <section class="sales-summary">
             <h2>Regular Orders Sales</h2>
+            <!-- Regular Orders Filter Form -->
+            <form method="get" action="{{ url_for('sales_summary') }}">
+                <label for="start_date">Start Date:</label>
+                <input type="date" name="start_date" value="{{ start_date }}">
+
+                <label for="end_date">End Date:</label>
+                <input type="date" name="end_date" value="{{ end_date }}">
+
+                <label for="item_filter">Item:</label>
+                <select name="item_filter">
+                    <option value="">All Items</option>
+                    {% for item in menu_items %}
+                        <option value="{{ item.Item_Name }}" {% if item.Item_Name == item_filter %} selected {% endif %}>{{ item.Item_Name }}</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="btn-manage">Filter</button>
+                <a href="{{ url_for('sales_summary') }}" class="clear-filter">Clear Filter</a>
+            </form>
+
             {% if regular_orders %}
                 <table>
                     <thead>

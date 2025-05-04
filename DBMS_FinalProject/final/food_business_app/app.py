@@ -41,9 +41,6 @@ def get_categories():
     conn.close()
     return categories
 
-
-
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -655,18 +652,37 @@ def menu_management():
     conn.close()
 
     return render_template('menu_management.html', menu_items=menu_items, item_to_edit=item_to_edit)
+
 #SALES SUMMARY PAGE
-@app.route('/sales_summary')
+@app.route('/sales_summary', methods=['GET', 'POST'])
 def sales_summary():
     # Ensure the user is an admin
     if session.get('role') != 'admin':
         return redirect(url_for('home'))
-    
+
     # Establish database connection
     conn = get_db_connection()
 
-    # Special Requests Sales: Fetching data for delivered special requests
-    delivered_requests = conn.execute("""
+    # Fetch the customer names for the Special Requests filter
+    customer_names = conn.execute("""
+        SELECT DISTINCT c.Name 
+        FROM Special_Requests sr
+        JOIN Customers c ON sr.Customer_ID = c.Customer_ID
+    """).fetchall()
+
+    # Fetch the menu items for the Regular Orders filter
+    menu_items = conn.execute("""
+        SELECT Item_Name 
+        FROM Menu_Items
+    """).fetchall()
+
+    # Process Special Requests filter
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    customer_name_filter = request.args.get('customer_name')
+
+    # Base query for special requests
+    special_request_query = """
         SELECT sr.Request_Item AS request_item,
                sr.Price AS price,
                sr.Time_Delivered AS time_delivered,
@@ -674,13 +690,25 @@ def sales_summary():
         FROM Special_Requests sr
         JOIN Customers c ON sr.Customer_ID = c.Customer_ID
         WHERE sr.Time_Delivered IS NOT NULL
-    """).fetchall()
+    """
+
+    # Add date and customer filters to the query if specified
+    if start_date:
+        special_request_query += f" AND sr.Time_Delivered >= '{start_date}'"
+    if end_date:
+        special_request_query += f" AND sr.Time_Delivered <= '{end_date}'"
+    if customer_name_filter:
+        special_request_query += f" AND c.Name = '{customer_name_filter}'"
+
+    # Fetch filtered special requests
+    delivered_requests = conn.execute(special_request_query).fetchall()
 
     # Calculate the total revenue from special requests
     total_special_sales = sum(req['price'] for req in delivered_requests)
 
     # Regular Orders Sales: Fetching data for delivered regular orders
-    regular_orders = conn.execute("""
+    item_filter = request.args.get('item_filter')
+    regular_orders_query = """
         SELECT mi.Item_Name AS item_name,
                mi.Price AS item_price,
                oi.Quantity AS quantity,
@@ -694,7 +722,16 @@ def sales_summary():
         JOIN Orders o ON oi.Order_ID = o.Order_ID
         JOIN Customers c ON o.Customer_ID = c.Customer_ID
         WHERE o.Delivered = 1
-    """).fetchall()
+    """
+
+    if start_date:
+        regular_orders_query += f" AND o.Time_Delivered >= '{start_date}'"
+    if end_date:
+        regular_orders_query += f" AND o.Time_Delivered <= '{end_date}'"
+    if item_filter:
+        regular_orders_query += f" AND mi.Item_Name = '{item_filter}'"
+
+    regular_orders = conn.execute(regular_orders_query).fetchall()
 
     # Calculate the total revenue from regular orders
     total_regular_sales = sum(row['total_price'] for row in regular_orders)
@@ -712,9 +749,14 @@ def sales_summary():
         regular_orders=regular_orders,
         total_special_sales=total_special_sales,
         total_regular_sales=total_regular_sales,
-        total_overall_sales=total_overall_sales
+        total_overall_sales=total_overall_sales,
+        customer_names=customer_names,
+        menu_items=menu_items,
+        start_date=start_date,
+        end_date=end_date,
+        item_filter=item_filter,
+        customer_name_filter=customer_name_filter
     )
-
 @app.route('/logout')
 def logout():
     session.clear()  # Clear the session

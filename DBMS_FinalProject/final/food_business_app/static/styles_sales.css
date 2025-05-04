@@ -12,7 +12,7 @@ body {
     margin-left: 1rem;
   }
   
-  /* === Header Flex Layout === */
+  /* === Header === */
   header {
     display: flex;
     justify-content: space-between;
@@ -22,7 +22,6 @@ body {
     border-bottom: 1px solid #ddd;
   }
   
-  /* === Logo === */
   .logo {
     font-size: 2rem;
     font-weight: bold;
@@ -30,13 +29,40 @@ body {
     color: #333;
   }
   
-  /* === Auth Buttons === */
   .auth-buttons {
     display: flex;
     gap: 1rem;
   }
   
-  /* === Sales Summary Table Styles === */
+  /* === Section Container === */
+  .container {
+    margin: 2rem;
+  }
+  
+  /* === Flash Messages === */
+  .flashes {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1rem;
+  }
+  
+  .flashes li {
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+  
+  .flashes .success {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .flashes .error {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  /* === Table Styles === */
   table {
     width: 100%;
     border-collapse: collapse;
@@ -86,45 +112,41 @@ body {
     }
   }
   
-  /* === Sales Summary Buttons === */
-  button {
-    padding: 6px 12px;
-    background-color: #4CAF50;
-    color: white;
+  /* === Buttons === */
+  button,
+  .btn-manage {
+    padding: 8px 16px;
+    background-color: #d70f64;
+    color: #fffaf0;
     border: none;
+    border-radius: 20px;
     cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  button:hover {
-    background-color: #45a049;
-  }
-  
-  /* === Pagination === */
-  .pagination {
-    text-align: center;
-    margin-top: 20px;
-  }
-  
-  .pagination a {
-    margin: 0 5px;
-    padding: 8px 12px;
-    background-color: #f2f2f2;
-    color: #333;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
     text-decoration: none;
-    border-radius: 5px;
   }
   
-  .pagination a.active {
-    background-color: #4CAF50;
-    color: white;
+  button:hover,
+  .btn-manage:hover {
+    background-color: #b70c55;
   }
   
-  .pagination a:hover {
-    background-color: #ddd;
+  .clear-filter {
+    padding: 8px 16px;
+    color: #d70f64;
+    text-decoration: underline;
+    font-weight: bold;
+    background: none;
+    border: none;
+    margin-left: 10px;
+    cursor: pointer;
   }
   
-  /* === Logout Button === */
+  .clear-filter:hover {
+    color: #b70c55;
+  }
+  
+  /* === Logout Button (if needed) === */
   .logout-link {
     background: #d9534f;
     color: #fffaf0;
@@ -141,29 +163,37 @@ body {
     background-color: #c9302c;
   }
   
-  /* === Custom Buttons === */
-  .btn-manage {
-    background: #d70f64;
-    color: #fffaf0;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-    text-decoration: none;
-  }
-  
-  .btn-manage:hover {
-    background-color: #b70c55;
-  }
-  
-  .btn-login:hover {
-    background-color: #fffaf0;
-    color: #d70f64;
-  }
-  
+  /* === Form Styling === */
   form {
-    display: inline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  form label {
+    font-weight: bold;
+  }
+  
+  form input[type="date"],
+  form select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  /* === Total Summary === */
+  .total-sales-summary {
+    background-color: #ffffff;
+    padding: 1rem;
+    margin-top: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  .total-sales-summary p {
+    font-size: 1.1rem;
+    font-weight: bold;
   }
   

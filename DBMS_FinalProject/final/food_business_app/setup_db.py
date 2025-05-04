@@ -1,3 +1,7 @@
+"""
+RUN THIS FIRST 
+THIS SETS UP THE DATABASE
+"""
 import sqlite3
 import os
 
@@ -110,7 +114,7 @@ if not cursor.fetchone():
     cursor.execute('''
         INSERT INTO Users (First_Name, Last_Name, Full_Name, Username, Password, Address, Contact, Role)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', ("Admin", "User", "Admin User", "admin", "admin098", "HQ", "09123456789", "admin"))
+    ''', ("Admin", "User", "Admin User", "Admin", "Heisenberg", "Albuquerque-HQ", "1-505-503-4455", "admin"))
 
 
 conn.commit()

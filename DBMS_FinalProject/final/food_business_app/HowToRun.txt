@@ -1,0 +1,16 @@
+1. run setup_db.py. It initializes an admin account
+2. run hashpass.py. This secures credentials of admin account
+3. run app.py
+4. click the link that comes out (usually, it's 127.xx)
+
+-----
+admin credentials:
+username: Admin
+password: Heisenberg
+
+----
+accounts created so far:
+Jesse Pinkman | chili
+Ruby Kurosawa | chocomint
+Ayumu Uehara | strawberry
+Shiki Wakana | cookiesandcream

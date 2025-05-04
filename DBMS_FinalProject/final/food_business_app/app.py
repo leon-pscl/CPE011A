@@ -655,6 +655,65 @@ def menu_management():
     conn.close()
 
     return render_template('menu_management.html', menu_items=menu_items, item_to_edit=item_to_edit)
+#SALES SUMMARY PAGE
+@app.route('/sales_summary')
+def sales_summary():
+    # Ensure the user is an admin
+    if session.get('role') != 'admin':
+        return redirect(url_for('home'))
+    
+    # Establish database connection
+    conn = get_db_connection()
+
+    # Special Requests Sales: Fetching data for delivered special requests
+    delivered_requests = conn.execute("""
+        SELECT sr.Request_Item AS request_item,
+               sr.Price AS price,
+               sr.Time_Delivered AS time_delivered,
+               c.Name AS customer_name
+        FROM Special_Requests sr
+        JOIN Customers c ON sr.Customer_ID = c.Customer_ID
+        WHERE sr.Time_Delivered IS NOT NULL
+    """).fetchall()
+
+    # Calculate the total revenue from special requests
+    total_special_sales = sum(req['price'] for req in delivered_requests)
+
+    # Regular Orders Sales: Fetching data for delivered regular orders
+    regular_orders = conn.execute("""
+        SELECT mi.Item_Name AS item_name,
+               mi.Price AS item_price,
+               oi.Quantity AS quantity,
+               (oi.Quantity * mi.Price) AS total_price,
+               o.Date AS order_date,
+               o.Time_Ordered AS time_ordered,
+               o.Time_Delivered AS time_delivered,
+               c.Name AS customer_name
+        FROM Order_Items oi
+        JOIN Menu_Items mi ON oi.Item_ID = mi.Item_ID
+        JOIN Orders o ON oi.Order_ID = o.Order_ID
+        JOIN Customers c ON o.Customer_ID = c.Customer_ID
+        WHERE o.Delivered = 1
+    """).fetchall()
+
+    # Calculate the total revenue from regular orders
+    total_regular_sales = sum(row['total_price'] for row in regular_orders)
+
+    # Combined Total Sales
+    total_overall_sales = total_special_sales + total_regular_sales
+
+    # Close the database connection
+    conn.close()
+
+    # Render the sales summary page with the data
+    return render_template(
+        'sales_summary.html',
+        delivered_requests=delivered_requests,
+        regular_orders=regular_orders,
+        total_special_sales=total_special_sales,
+        total_regular_sales=total_regular_sales,
+        total_overall_sales=total_overall_sales
+    )
 
 @app.route('/logout')
 def logout():

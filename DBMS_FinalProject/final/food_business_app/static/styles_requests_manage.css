@@ -21,7 +21,8 @@ header {
     font-weight: bold;
     text-decoration: none;
     color: #333;
-  }
+}
+
 /* Card Styles (Request and Special Requests) */
 .request-card, .card {
     border: 1px solid #ccc;
@@ -97,19 +98,67 @@ header {
     background-color: #b70c55;
 }
 
+.btn-approve,
+.btn-reject {
+    transition: background-color 0.3s, transform 0.2s ease;
+}
+
+.approval-buttons {
+    display: flex;
+    gap: 6px;  /* Closer gap between approve and reject buttons */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: inherit;
+    font-size: 14px;
+    text-align: center;
+    text-decoration: none;
+}
+
+/* Hover effect for approve button */
+.btn-approve:hover {
+    background-color: #28a745;
+    transform: scale(1.05);
+    color: white;
+}
+
+/* Hover effect for reject button */
+.btn-reject:hover {
+    background-color: #dc3545;
+    transform: scale(1.05);
+    color: white;
+}
+
 .btn-approve {
     background-color: #4CAF50;
     color: white;
+    text-decoration: none;
 }
 
 .btn-reject {
     background-color: #f44336;
     color: white;
+    text-decoration: none;
 }
 
 .btn-edit {
-    background-color: #ff9800;
+    background-color: #f7941d;
     color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: inherit;
+    font-size: 14px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-edit:hover {
+    background-color: #e67e00;
 }
 
 .btn-deliver {
@@ -120,4 +169,30 @@ header {
 button:disabled {
     background-color: #ddd;
     cursor: not-allowed;
+}
+
+/* Delivery Date and Time Fields */
+.delivery-info {
+    display: flex;
+    gap: 12px;  /* Adjusted to create space between date and time inputs */
+    margin-bottom: 4px; /* Space between inputs and button */
+}
+
+.delivery-info input {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: auto;
+}
+
+.inline-edit-form button {
+    margin-top: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .delivery-info {
+        flex-direction: column; /* Stack date and time inputs vertically on smaller screens */
+        gap: 10px;
+    }
 }

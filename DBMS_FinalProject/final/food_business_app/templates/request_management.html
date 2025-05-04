@@ -25,57 +25,83 @@
             {% endif %}
         {% endwith %}
 
-        {% for request in requests %}
-        <div class="card">
-            <div class="card-header">
-                <h3>Customer Name: {{ request.customer_name }}</h3>
-                <h4><strong>Phone:</strong> {{ request.customer_phone }}</h4>
-            </div>
-            <div class="card-body">
-                <p><strong>Requested At:</strong> {{ request.time_ordered }}</p>
-                
-                <form action="{{ url_for('edit_request_time', request_id=request.id) }}" method="POST" class="inline-edit-form">
-                    <p><strong>Requested At:</strong> {{ request.time_ordered }}</p>
-                    <input type="date" name="request_date" value="{{ request.request_date }}" required>
-                    <button type="submit" class="btn-update">Update</button>
-                </form>
-                
-                <p><strong>Special Request:</strong></p>
-                <p>{{ request.special_request | replace('\n', '<br>') | safe }}</p>
-                
-                <p class="status"><strong>Status:</strong>
-                    {% if request.approved %}
-                        ✅ Approved
-                        {% if request.time_approved %}
-                            on {{ request.time_approved }}
-                        {% endif %}
-                        {% if request.time_delivered %}
-                            <br>📦 Delivered on {{ request.time_delivered }}
-                        {% else %}
-                            <br>🚚 Not yet delivered
-                        {% endif %}
-                    {% elif request.rejected %}
-                        ❌ Rejected
-                        {% if request.time_rejected %}
-                            on {{ request.time_rejected }}
-                        {% endif %}
-                    {% else %}
-                        ⏳ Not yet reviewed
-                    {% endif %}
-                </p>
-            </div>
+        {% if requests %}
+            {% for request in requests %}
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Customer Name: {{ request.customer_name }}</h3>
+                        <h4><strong>Phone:</strong> {{ request.customer_phone }}</h4>
+                    </div>
 
-            <div class="card-footer actions">
-                <a href="{{ url_for('approve_request', request_id=request.id) }}" class="btn-approve">Approve</a>
-                <a href="{{ url_for('reject_request', request_id=request.id) }}" class="btn-reject">Reject</a>
-                <a href="{{ url_for('edit_request_time', request_id=request.id) }}" class="btn-edit">Edit Date/Time</a>
-                
-                <form action="{{ url_for('mark_special_request_delivered', request_id=request.id) }}" method="POST" style="display: inline;">
-                    <button type="submit" class="btn-deliver">Mark as Delivered</button>
-                </form>
-            </div>
-        </div>
-        {% endfor %}
+                    <div class="card-body">
+                        {% if not request.approved and not request.rejected %}
+                            <form action="{{ url_for('edit_request_time', request_id=request.id) }}" method="POST" class="inline-edit-form">
+                                <p><strong>Requested Delivery Date and Time:</strong></p>
+                                <div class="delivery-info">
+                                    <input type="date" name="request_date" value="{{ request.request_date }}" required>
+                                    <input type="time" name="request_time" value="{{ request.request_time or '12:00' }}" required>
+                                </div>
+                                <button type="submit" class="btn-edit">Edit Date/Time</button>
+                            </form>
+                        {% else %}
+                            <p>Delivery date and time cannot be edited as the request has been {% if request.approved %}approved{% elif request.rejected %}rejected{% endif %}.</p>
+                        {% endif %}
+
+                        <p><strong>Special Request:</strong></p>
+                        <p>{{ request.special_request | replace('\n', '<br>') | safe }}</p>
+
+                        <p class="status"><strong>Status:<br></strong>
+                            {% if request.approved %}
+                                ✅ Approved
+                                {% if request.time_approved %}
+                                    on {{ request.time_approved }}
+                                {% endif %}
+                                {% if request.time_delivered %}
+                                    <br>📦 Delivered on {{ request.time_delivered }}
+                                {% else %}
+                                    <br>🚚 Not yet delivered
+                                {% endif %}
+                            {% elif request.rejected %}
+                                ❌ Rejected
+                                {% if request.time_rejected %}
+                                    on {{ request.time_rejected }}
+                                {% endif %}
+                            {% else %}
+                                ⏳ Not yet reviewed
+                            {% endif %}
+                        </p>
+
+                        <!-- Price Section -->
+                        {% if request.approved and not request.time_delivered %}
+                            <p><strong>Price:</strong> ₱{{ request.price }}</p>
+                            <form action="{{ url_for('update_price', request_id=request.id) }}" method="POST">
+                                <input type="number" name="price" value="{{ request.price }}" step="0.01" min="0" required>
+                                <button type="submit" class="btn-edit">Update Price</button>
+                            </form>
+                        {% elif request.approved and request.time_delivered %}
+                            <p><strong>Price:</strong> ₱{{ request.price }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="card-footer actions">
+                        {% if not request.approved and not request.rejected %}
+                            <div class="approval-buttons">
+                                <a href="{{ url_for('approve_request', request_id=request.id) }}" class="btn-approve">Approve</a>
+                                <a href="{{ url_for('reject_request', request_id=request.id) }}" class="btn-reject">Reject</a>
+                            </div>
+                        {% endif %}
+
+                        {% if request.approved and not request.time_delivered %}
+                            <form action="{{ url_for('mark_special_request_delivered', request_id=request.id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn-deliver">Mark as Delivered</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div> <!-- ✅ Correctly placed card closing tag -->
+            {% endfor %}
+        {% else %}
+            <p>No special requests to manage.</p>
+        {% endif %}
     </div>
 </body>
 </html>

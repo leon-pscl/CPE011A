@@ -252,6 +252,7 @@ def request_management():
             sr.Approved AS approved,
             sr.Time_Approved AS time_approved,
             sr.Time_Rejected AS time_rejected,
+            sr.Price AS price,  -- Added this line to select the price
             CASE 
                 WHEN sr.Time_Rejected IS NOT NULL THEN 1 
                 ELSE 0 
@@ -259,7 +260,6 @@ def request_management():
         FROM Special_Requests sr
         JOIN Customers c ON sr.Customer_ID = c.Customer_ID
         ORDER BY sr.Time_Ordered DESC
-
     ''')
 
     requests = cursor.fetchall()
@@ -283,6 +283,7 @@ def request_management():
     conn.close()
 
     return render_template('request_management.html', requests=requests_dict, user_logged_in=True)
+
 
 
 
@@ -378,6 +379,33 @@ def edit_request_time(request_id):
     conn.close()
 
     flash("Requested delivery time updated.", "success")
+    return redirect(url_for('request_management'))
+
+@app.route('/update_price/<int:request_id>', methods=['POST'])
+def update_price(request_id):
+    if session.get('role') != 'admin':
+        return redirect(url_for('home'))
+
+    price = request.form['price']
+    try:
+        price = float(price)
+    except ValueError:
+        flash("Invalid price entered.", "danger")
+        return redirect(url_for('request_management'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        UPDATE Special_Requests
+        SET Price = ?
+        WHERE Request_ID = ?
+    ''', (price, request_id))
+
+    conn.commit()
+    conn.close()
+
+    flash("Price updated successfully.", "success")
     return redirect(url_for('request_management'))
 
 
@@ -627,7 +655,6 @@ def menu_management():
     conn.close()
 
     return render_template('menu_management.html', menu_items=menu_items, item_to_edit=item_to_edit)
-
 
 @app.route('/logout')
 def logout():

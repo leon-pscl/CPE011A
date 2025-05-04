@@ -102,6 +102,7 @@ CREATE TABLE IF NOT EXISTS Special_Requests (
     Approved BOOLEAN NOT NULL,
     Time_Approved DATETIME,
     Time_Rejected DATETIME,
+    Price Decimal(10, 2) NOT NULL Default 0.00, 
     FOREIGN KEY (Customer_ID) REFERENCES Customers(Customer_ID)
 )
 ''')

@@ -1,79 +1,147 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const checkboxes = document.querySelectorAll(".item-checkbox");
-
-  // Loop over each checkbox (menu item) and add an event listener
-  checkboxes.forEach(function (checkbox) {
-      const parent = checkbox.closest(".menu-item"); // Get the parent container of the checkbox
-      const quantityWrapper = parent.querySelector(".quantity-wrapper"); // Get the quantity wrapper
-      const quantityInput = quantityWrapper.querySelector("input"); // Get the quantity input
-      
-      // Initial state: Hide the quantity input if checkbox is not checked
+    const checkboxes = document.querySelectorAll(".item-checkbox");
+  
+    // Loop over each checkbox (menu item) and add an event listener
+    checkboxes.forEach(function (checkbox) {
+      const parent = checkbox.closest(".menu-item"); // Get the parent container
+      const quantityWrapper = parent.querySelector(".quantity-wrapper");
+      const quantityInput = quantityWrapper.querySelector("input");
+  
+      // Initial state: Show/hide based on checkbox state
       quantityWrapper.style.display = checkbox.checked ? "inline-block" : "none";
       if (checkbox.checked) {
-          quantityInput.value = 1; // Set default quantity to 1 when checked
+        quantityInput.value = 1;
       }
-      
-      // Toggle quantity visibility when checkbox changes
+  
       checkbox.addEventListener("change", function () {
-          // Show/hide the quantity input based on checkbox state
-          quantityWrapper.style.display = this.checked ? "inline-block" : "none";
-
-          // Set quantity to 1 when checked, otherwise reset to 0
-          if (this.checked) {
-              quantityInput.value = 1; // Default to 1 when checked
-          } else {
-              quantityInput.value = 0; // Reset to 0 when unchecked
-          }
+        quantityWrapper.style.display = this.checked ? "inline-block" : "none";
+        quantityInput.value = this.checked ? 1 : 0;
       });
-  });
-
-  // Handle form submission (client-side validation)
-  const form = document.querySelector("form");
-  form.addEventListener("submit", function (event) {
-      let isValid = true;
-      const checkboxes = document.querySelectorAll(".item-checkbox");
-
-      // Loop over each checkbox to check if any selected item has a quantity greater than 0
-      checkboxes.forEach(function (checkbox) {
-          if (checkbox.checked) {
-              const quantityInput = checkbox.closest(".menu-item").querySelector(".item-quantity");
-              if (parseInt(quantityInput.value) <= 0) {
-                  isValid = false;
-                  alert("Please specify a valid quantity for each selected item.");
-                  return; // Stop further processing if invalid quantity is found
-              }
-          }
-      });
-
-      // Prevent form submission if validation fails
-      if (!isValid) {
-          event.preventDefault();
-      }
-  });
-
-  // ===== New: Handle Delivery Time Visibility and Auto-Fill =====
-  const orderTypeSelect = document.getElementById("order-type");
-  const deliveryTimeSection = document.getElementById("delivery-time-section");
-  const deliveryTimeInput = document.getElementById("delivery-time-input");
-
-  function updateDeliveryTimeVisibility() {
+    });
+  
+    // ===== Handle Delivery Time Visibility and Auto-Fill =====
+    const orderTypeSelect = document.getElementById("order-type");
+    const deliveryTimeSection = document.getElementById("delivery-time-section");
+    const deliveryTimeInput = document.getElementById("delivery-time-input");
+  
+    function updateDeliveryTimeVisibility() {
       const selectedType = orderTypeSelect.value;
-
+  
       if (selectedType === "Delivery") {
-          deliveryTimeSection.style.display = "block";
-          deliveryTimeInput.required = true;
+        deliveryTimeSection.style.display = "block";
+        deliveryTimeInput.required = true;
       } else {
-          deliveryTimeSection.style.display = "none";
-          deliveryTimeInput.required = false;
-
-          // Auto-fill with current time in HH:MM format
-          const now = new Date();
-          const hours = now.getHours().toString().padStart(2, '0');
-          const minutes = now.getMinutes().toString().padStart(2, '0');
-          deliveryTimeInput.value = `${hours}:${minutes}`;
+        deliveryTimeSection.style.display = "none";
+        deliveryTimeInput.required = false;
+  
+        // Auto-fill with current time in HH:MM format
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        deliveryTimeInput.value = `${hours}:${minutes}`;
       }
-  }
-
-  orderTypeSelect.addEventListener("change", updateDeliveryTimeVisibility);
-  updateDeliveryTimeVisibility(); // Call once on load
-});
+    }
+  
+    orderTypeSelect.addEventListener("change", updateDeliveryTimeVisibility);
+    updateDeliveryTimeVisibility(); // Call once on load
+  
+    // ===== Handle Form Submission Validation =====
+    const form = document.querySelector("form");
+    form.addEventListener("submit", function (event) {
+      const checkboxes = document.querySelectorAll(".item-checkbox");
+      let hasSelectedItem = false;
+  
+      for (let checkbox of checkboxes) {
+        if (checkbox.checked) {
+          hasSelectedItem = true;
+          const quantityInput = checkbox.closest(".menu-item").querySelector(".item-quantity");
+          const quantity = parseInt(quantityInput.value);
+          if (isNaN(quantity) || quantity <= 0) {
+            alert("Please specify a valid quantity for each selected item.");
+            event.preventDefault();
+            return;
+          }
+        }
+      }
+  
+      if (!hasSelectedItem) {
+        alert("Please select at least one menu item to place an order.");
+        event.preventDefault();
+        return;
+      }
+    });
+  });
+  document.addEventListener("DOMContentLoaded", function () {
+    const checkboxes = document.querySelectorAll(".item-checkbox");
+  
+    // Loop over each checkbox (menu item) and add an event listener
+    checkboxes.forEach(function (checkbox) {
+      const parent = checkbox.closest(".menu-item"); // Get the parent container
+      const quantityWrapper = parent.querySelector(".quantity-wrapper");
+      const quantityInput = quantityWrapper.querySelector("input");
+  
+      // Initial state: Show/hide based on checkbox state
+      quantityWrapper.style.display = checkbox.checked ? "inline-block" : "none";
+      if (checkbox.checked) {
+        quantityInput.value = 1;
+      }
+  
+      checkbox.addEventListener("change", function () {
+        quantityWrapper.style.display = this.checked ? "inline-block" : "none";
+        quantityInput.value = this.checked ? 1 : 0;
+      });
+    });
+  
+    // ===== Handle Delivery Time Visibility and Auto-Fill =====
+    const orderTypeSelect = document.getElementById("order-type");
+    const deliveryTimeSection = document.getElementById("delivery-time-section");
+    const deliveryTimeInput = document.getElementById("delivery-time-input");
+  
+    function updateDeliveryTimeVisibility() {
+      const selectedType = orderTypeSelect.value;
+  
+      if (selectedType === "Delivery") {
+        deliveryTimeSection.style.display = "block";
+        deliveryTimeInput.required = true;
+      } else {
+        deliveryTimeSection.style.display = "none";
+        deliveryTimeInput.required = false;
+  
+        // Auto-fill with current time in HH:MM format
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        deliveryTimeInput.value = `${hours}:${minutes}`;
+      }
+    }
+  
+    orderTypeSelect.addEventListener("change", updateDeliveryTimeVisibility);
+    updateDeliveryTimeVisibility(); // Call once on load
+  
+    // ===== Handle Form Submission Validation =====
+    const form = document.querySelector("form");
+    form.addEventListener("submit", function (event) {
+      const checkboxes = document.querySelectorAll(".item-checkbox");
+      let hasSelectedItem = false;
+  
+      for (let checkbox of checkboxes) {
+        if (checkbox.checked) {
+          hasSelectedItem = true;
+          const quantityInput = checkbox.closest(".menu-item").querySelector(".item-quantity");
+          const quantity = parseInt(quantityInput.value);
+          if (isNaN(quantity) || quantity <= 0) {
+            alert("Please specify a valid quantity for each selected item.");
+            event.preventDefault();
+            return;
+          }
+        }
+      }
+  
+      if (!hasSelectedItem) {
+        alert("Please select at least one menu item to place an order.");
+        event.preventDefault();
+        return;
+      }
+    });
+  });
+    

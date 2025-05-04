@@ -3,6 +3,7 @@ import sqlite3
 import os
 from datetime import datetime
 import re
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -33,23 +34,14 @@ def generate_unique_username(first_name, last_name, cursor):
 
 #fetch values from CATEGORIES table
 def get_categories():
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT Category_Name FROM Categories")
     categories = cursor.fetchall()
     conn.close()
     return categories
 
-#add menu items
-def add_menu_item(item_name, category, price):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute(''' 
-        INSERT INTO Menu_Items (Item_Name, Category, Price) 
-        VALUES (?, ?, ?)
-    ''', (item_name, category, price))
-    conn.commit()
-    conn.close()
+
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -58,7 +50,7 @@ def register():
         full_name = request.form["full_name"].strip()
         address = request.form["address"]
         contact = request.form["contact"]
-        password = request.form["password"]
+        password = generate_password_hash(request.form["password"]) #Hashed password for security
         role = "user"
 
         names = full_name.split()
@@ -93,11 +85,11 @@ def login():
 
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM Users WHERE Username = ? AND Password = ?", (username, password))
+        cursor.execute("SELECT * FROM Users WHERE Username = ?", (username,))
         user = cursor.fetchone()
         conn.close()
 
-        if user:
+        if user and check_password_hash(user['Password'], password):
             session['user'] = user['Username']
             session['full_name'] = user['Full_Name']
             session['address'] = user['Address']
@@ -309,23 +301,30 @@ def order_details(order_id):
     ''', (order_id,))
     order_items = cursor.fetchall()
 
-    # Fetch delivery-related order info
+    # Fetch delivery-related order info and customer info
     cursor.execute('''
-        SELECT Requested_Delivery_Time, Delivered, Time_Delivered
-        FROM Orders
-        WHERE Order_ID = ?
+        SELECT o.Requested_Delivery_Time, o.Delivered, o.Time_Delivered, c.Name
+        FROM Orders o
+        JOIN Customers c ON o.Customer_ID = c.Customer_ID
+        WHERE o.Order_ID = ?
     ''', (order_id,))
     order_meta = cursor.fetchone()
 
     conn.close()
-
+    
+    # Extract data from order_meta
+    requested_delivery_time = order_meta['Requested_Delivery_Time'] if order_meta else None
+    delivered = order_meta['Delivered'] if order_meta else None
+    time_delivered = order_meta['Time_Delivered'] if order_meta else None
+    customer_name = order_meta['Name'] if order_meta else None
+    
     return render_template('order_details.html',
-                            order_id=order_id,
-                            order_items=order_items,
-                            requested_delivery_time=order_meta['Requested_Delivery_Time'] if order_meta else None,
-                            delivered=order_meta['Delivered'] if order_meta else None,
-                            time_delivered=order_meta['Time_Delivered'] if order_meta else None)
-
+                        order_id=order_id,
+                        order_items=order_items,
+                        requested_delivery_time=requested_delivery_time,
+                        delivered=delivered,
+                        time_delivered=time_delivered,
+                        customer_name=customer_name)
 @app.route('/order_success')
 def order_success():
     if 'user' not in session:
@@ -383,9 +382,18 @@ def order_success():
 
     return render_template('order_success.html', order_items=order_items, requested_delivery_time=requested_delivery_time)
 
-import sqlite3
-import os
 
+#add menu items
+def add_menu_item(item_name, category, price):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(''' 
+        INSERT INTO Menu_Items (Item_Name, Category, Price) 
+        VALUES (?, ?, ?)
+    ''', (item_name, category, price))
+    conn.commit()
+    conn.close()
+    
 @app.route('/menu_management', methods=['GET', 'POST'])
 def menu_management():
     if session.get('role') != 'admin':

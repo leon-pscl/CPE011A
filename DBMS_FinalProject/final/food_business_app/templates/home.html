@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>{% if user_logged_in %}Welcome, {{ full_name }}{% else %}Welcome to Foodie{% endif %}</title>
+  <title>{% if user_logged_in %}Welcome, {{ full_name }}{% else %}Welcome to BiteRush{% endif %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles_home.css') }}">
   <script src="{{ url_for('static', filename='scripts_home.js') }}"></script>
 
@@ -11,7 +11,7 @@
   <!-- Header -->
   <header>
     <div>
-      <a href="/" class="logo">Foodie</a>
+      <a href="/" class="logo">BiteRush</a>
     </div>
     <div class="auth-buttons">
       {% if not user_logged_in %}
@@ -31,7 +31,7 @@
         <p><strong>Address:</strong> {{ address }}</p>
       </div>
     {% else %}
-      <h1>Welcome to Foodie!</h1>
+      <h1>Welcome to BiteRush!</h1>
       <p>Please <a href="{{ url_for('login') }}">log in</a> or <a href="{{ url_for('register') }}">sign up</a> to place an order.</p>
     {% endif %}
 

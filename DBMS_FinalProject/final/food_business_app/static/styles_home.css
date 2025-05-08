@@ -6,7 +6,7 @@ a {
 }
 body {
   font-family: 'Segoe UI', sans-serif;
-  background-color: #fdf6e3;
+  background-color: #f4f6f8;
   color: #4b3832;
   padding: 40px;
 }
@@ -14,7 +14,7 @@ body {
 .container {
   max-width: 900px;
   margin: auto;
-  background: #fffaf0;
+  background: #fedc48;
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
@@ -25,6 +25,10 @@ h1, h2, h3 {
   padding-bottom: 8px;
 }
 
+.welcome{
+  color: #d9534f;
+  font-size: 40px;
+}
 .logout-link {
   background: #d9534f;
   color: #fffaf0;
@@ -94,9 +98,9 @@ input, select {
   text-align: center;
   display: inline-block;
   border-radius: 5px;
-  background-color: #c19a6b; /* Light blue background */
+  background-color: #d9534f; /* Light blue background */
   border: none;
-  color: #202020; /* Dark gray color */
+  color: #fffaf0; /* Dark gray color */
   padding: 15px;
   transition: all 0.5s; /* Smooth transition for all properties */
   cursor: pointer;
@@ -144,7 +148,7 @@ header {
 
 /* Logo style */
 .logo {
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: bold;
   text-decoration: none;
   color: #333;

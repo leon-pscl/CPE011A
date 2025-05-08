@@ -518,6 +518,8 @@ def order_details(order_id):
                         delivered=delivered,
                         time_delivered=time_delivered,
                         customer_name=customer_name)
+from datetime import datetime
+
 @app.route('/order_success')
 def order_success():
     if 'user' not in session:
@@ -538,11 +540,11 @@ def order_success():
 
     if not customer:
         conn.close()
-        return render_template('order_success.html', order_items=[], requested_delivery_time=None)
+        return render_template('order_success.html', order_items=[], requested_delivery_time=None, subtotal=0)
 
     customer_id = customer['Customer_ID']
 
-    # Get the most recent order
+    #  Get the most recent order
     cursor.execute("""
         SELECT * FROM Orders
         WHERE Customer_ID = ?
@@ -553,11 +555,11 @@ def order_success():
 
     if not latest_order:
         conn.close()
-        return render_template('order_success.html', order_items=[], requested_delivery_time=None)
+        return render_template('order_success.html', order_items=[], requested_delivery_time=None, subtotal=0)
 
     order_id = latest_order['Order_ID']
 
-    # Get the ordered menu items
+    # get the ordered menu items
     cursor.execute("""
         SELECT m.Item_Name, oi.Quantity, m.Price
         FROM Order_Items oi
@@ -566,14 +568,21 @@ def order_success():
     """, (order_id,))
     order_items = cursor.fetchall()
 
-    # Format the requested delivery time if available
+    #  Compute subtotal
+    subtotal = sum(item['Quantity'] * item['Price'] for item in order_items)
+
     requested_delivery_time = latest_order['Requested_Delivery_Time']
     if requested_delivery_time:
         requested_delivery_time = datetime.strptime(requested_delivery_time, '%H:%M').strftime('%I:%M %p')
 
     conn.close()
 
-    return render_template('order_success.html', order_items=order_items, requested_delivery_time=requested_delivery_time)
+    return render_template(
+        'order_success.html',
+        order_items=order_items,
+        requested_delivery_time=requested_delivery_time,
+        subtotal=subtotal
+    )
 
 
 #add menu items

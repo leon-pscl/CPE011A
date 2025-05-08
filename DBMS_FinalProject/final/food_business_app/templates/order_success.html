@@ -14,25 +14,29 @@
     <div class="icon">✅</div>
     <h2>Your order was placed successfully!</h2>
 
-    <!-- ✅ Order Tray Display -->
+    <!-- Order Tray Display -->
     <h3>Your Tray</h3>
 
     {% if order_items %}
-      <ul>
-        {% for item in order_items %}
-          <li>
-            {{ item['Item_Name'] }} - ₱{{ '%.2f'|format(item['Price']) }} × {{ item['Quantity'] }}
-          </li>
-        {% endfor %}
-      </ul>
-        <!-- Requested Delivery Time -->
-        {% if requested_delivery_time %}
-        <p class="delivery-time"><strong>Requested Delivery Time:</strong> {{ requested_delivery_time }}</p>
-      {% endif %}
-    {% else %}
-      <p>No regular menu items were ordered.</p>
+    <ul>
+      {% for item in order_items %}
+        <li>
+          {{ item['Item_Name'] }} - ₱{{ '%.2f'|format(item['Price']) }} × {{ item['Quantity'] }}
+        </li>
+      {% endfor %}
+    </ul>
+  
+    <!--Total Display -->
+    <p class="subtotal"><strong>Total:</strong> ₱{{ '%.2f'|format(subtotal) }}</p>
+  
+    <!-- Requested Delivery Time -->
+    {% if requested_delivery_time %}
+      <p class="delivery-time"><strong>Requested Delivery Time:</strong> {{ requested_delivery_time }}</p>
     {% endif %}
-
+  {% else %}
+    <p>No regular menu items were ordered.</p>
+  {% endif %}
+  
     {% if special %}
       <p><strong>Special Request:</strong> {{ special['Request_Item'] }}</p>
     {% endif %}

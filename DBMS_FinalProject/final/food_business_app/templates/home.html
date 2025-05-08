@@ -25,13 +25,13 @@
 
   <div class="container">
     {% if user_logged_in %}
-      <h1>Welcome, {{ full_name }}</h1>
+      <h1 class = "welcome">Welcome, {{ full_name }}</h1>
       <div class="section">
         <p><strong>Name:</strong> {{ full_name }}</p>
         <p><strong>Address:</strong> {{ address }}</p>
-      </div>
+      </d >
     {% else %}
-      <h1>Welcome to BiteRush!</h1>
+      <h1 class = "welcome">Welcome to BiteRush!</h1>
       <p>Please <a href="{{ url_for('login') }}">log in</a> or <a href="{{ url_for('register') }}">sign up</a> to place an order.</p>
     {% endif %}
 
@@ -82,7 +82,7 @@
         <h3>Special Order</h3>
           <div class="special-request-link">
             <p>For special requests, let us know more about your order.</p>
-            <a href="{{ url_for('special_requests') }}" class="button_ani">Manage Special Requests</a>
+            <a href="{{ url_for('special_requests') }}" class="button_ani">Book A Special Request</a>
           </div>
         </div>
 

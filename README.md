@@ -1,2 +1,1 @@
-# CPE011A
-Repository for files in CPE011A for collaboration with others
+Personal archive for outputs in CPE011A - Database Management Systems
